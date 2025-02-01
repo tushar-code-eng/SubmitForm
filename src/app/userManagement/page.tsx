@@ -42,6 +42,10 @@ export default function UserManagement() {
         )
     }
 
+    const handleSelectAll = (checked: boolean) => {
+        setSelectedUsers(checked ? [...users] : [])
+    }
+
     const handlePrintSelectedUsers = () => {
         if (selectedUsers.length === 0) {
             toast({
@@ -50,21 +54,16 @@ export default function UserManagement() {
             })
             return
         }
-
         const printWindow = window.open("", "_blank")
         if (printWindow) {
             printWindow.document.write(`
             <html>
             <head>
-            //   <title>Shipping Labels - Night Suits By Aaka</title>
               <style>
                 @media print {
                   @page {
                     size: A4;
                     margin: 10mm;
-                  }
-                  .page-break {
-                    break-after: page;
                   }
                 }
                 body {
@@ -76,18 +75,16 @@ export default function UserManagement() {
                 .page {
                   display: flex;
                   flex-direction: column;
-                  gap: 15px; /* Space between labels for tearing */
-                  page-break-after: always;
-                  min-height: calc(297mm - 20mm); /* A4 height minus margins */
-                }
-                .page:last-child {
-                  page-break-after: auto;
+                  gap: 25px;
+                  height: auto;
+                  page-break-after: avoid;
                 }
                 .shipping-label {
                   border: 1px solid #000;
                   padding: 15px;
                   flex: 1;
-                  max-height: calc((250mm - 20mm - 30px) / 3); /* Equal height for 3 labels minus gaps */
+                  height: calc((277mm - 65px) / 3);
+                  box-sizing: border-box;
                 }
                 .header {
                   display: flex;
@@ -125,99 +122,50 @@ export default function UserManagement() {
             </head>
             <body>
           `)
-
+    
             const pages = []
-            const pageSize = 3; // number of users per page
-
+            const pageSize = 3;
+    
             for (let i = 0; i < selectedUsers.length; i += pageSize) {
                 pages.push(selectedUsers.slice(i, i + pageSize));
             }
-
-            // Print each page
+    
             pages.forEach((pageUsers, pageIndex) => {
-                printWindow.document.write('<div class="page">');
-
+                const isLastPage = pageIndex === pages.length - 1;
+                printWindow.document.write(`<div class="page" style="${!isLastPage ? 'page-break-after: always;' : ''}">`);
+    
                 pageUsers.forEach((user) => {
                     const addressParts = user.address.split(",");
                     const mainAddress = addressParts.slice(0, -1).join(",");
                     const cityState = addressParts[addressParts.length - 1];
-
+    
                     printWindow.document.write(`
-        <div class="shipping-label">
-            <div class="header">
-                <img src="logo-url" alt="AAKA Logo" class="logo">
-                <div class="company-name">Night Suits By Aaka</div>
-            </div>
-            <div class="shipping-title">Shipping Address:</div>
-            <div class="address-line">${user.fullName}</div>
-            <div class="address-line">${mainAddress}</div>
-            <div class="address-line">${cityState}, ${user.state} ${user.zipCode}</div>
-            <div class="address-line">${user.mobileNumber}${user.alternateMobileNumber ? " / " + user.alternateMobileNumber : ""}</div>
-            <div class="from-address">
-                From Address:<br>
-                Night Suits By Aaka<br>
-                Apoorva<br>
-                7009928110
-            </div>
-        </div>
-        `);
+                    <div class="shipping-label">
+                        <div class="header">
+                            <img src="logo-url" alt="AAKA Logo" class="logo">
+                            <div class="company-name">Night Suits By Aaka</div>
+                        </div>
+                        <div class="shipping-title">Shipping Address:</div>
+                        <div class="address-line">${user.fullName}</div>
+                        <div class="address-line">${mainAddress}</div>
+                        <div class="address-line">${cityState}, ${user.state} ${user.zipCode}</div>
+                        <div class="address-line">${user.mobileNumber}${user.alternateMobileNumber ? " / " + user.alternateMobileNumber : ""}</div>
+                        <div class="from-address">
+                            From Address:<br>
+                            Night Suits By Aaka<br>
+                            Apoorva<br>
+                            7009928110
+                        </div>
+                    </div>
+                    `);
                 });
-
+    
                 printWindow.document.write("</div>");
             });
-
-            // Avoid adding an extra page if there are fewer than 3 labels on the last page
-            if (pages.length > 0 && pages[pages.length - 1].length < pageSize) {
-                printWindow.document.write('<div class="page"></div>');  // Empty page fix, avoid unnecessary page break
-            }
-
+    
             printWindow.document.write("</body></html>");
             printWindow.document.close();
             printWindow.print();
-
-
-            // const pages = []
-            // for (let i = 0; i < selectedUsers.length; i += 3) {
-            //     pages.push(selectedUsers.slice(i, i + 3))
-            // }
-
-            // // Print each page
-            // pages.forEach((pageUsers, pageIndex) => {
-            //     printWindow.document.write('<div class="page">')
-
-            //     // Print users on this page (up to 3)
-            //     pageUsers.forEach((user) => {
-            //         const addressParts = user.address.split(",")
-            //         const mainAddress = addressParts.slice(0, -1).join(",")
-            //         const cityState = addressParts[addressParts.length - 1]
-
-            //         printWindow.document.write(`
-            //     <div class="shipping-label">
-            //       <div class="header">
-            //         <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/wa.jpg-RspKLoMSFVfhIsY0nTA16Pu1uYL5Y4.jpeg" alt="AAKA Logo" class="logo">
-            //         <div class="company-name">Night Suits By Aaka</div>
-            //       </div>
-            //       <div class="shipping-title">Shipping Address:</div>
-            //       <div class="address-line">${user.fullName}</div>
-            //       <div class="address-line">${mainAddress}</div>
-            //       <div class="address-line">${cityState}, ${user.state} ${user.zipCode}</div>
-            //       <div class="address-line">${user.mobileNumber}${user.alternateMobileNumber ? " / " + user.alternateMobileNumber : ""}</div>
-            //       <div class="from-address">
-            //         From Address:<br>
-            //         Night Suits By Aaka<br>
-            //         Apoorva<br>
-            //         7009928110
-            //       </div>
-            //     </div>
-            //   `)
-            //     })
-
-            //     printWindow.document.write("</div>")
-            // })
-
-            // printWindow.document.write("</body></html>")
-            // printWindow.document.close()
-            // printWindow.print()
         }
     }
 
@@ -248,7 +196,12 @@ export default function UserManagement() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[50px]">Select</TableHead>
+                                    <TableHead className="w-[50px]">
+                                        <Checkbox
+                                            checked={users.length > 0 && selectedUsers.length === users.length}
+                                            onCheckedChange={handleSelectAll}
+                                        />
+                                    </TableHead>
                                     <TableHead className="w-[50px]">S.No</TableHead>
                                     <TableHead>Full Name</TableHead>
                                     <TableHead>Address</TableHead>
@@ -289,4 +242,3 @@ export default function UserManagement() {
         </div>
     )
 }
-

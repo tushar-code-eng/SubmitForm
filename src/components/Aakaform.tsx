@@ -81,7 +81,7 @@ export function AAKAForm() {
   return (
     <Card className="w-full max-w-2xl mx-auto bg-white shadow-lg">
       <CardHeader className="bg-primary text-primary-foreground">
-        <CardTitle>AAKA Company Form</CardTitle>
+        <CardTitle>Billing Details</CardTitle>
         <CardDescription className="text-primary-foreground/80">
           Please fill out all the required fields below.
         </CardDescription>
