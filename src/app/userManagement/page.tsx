@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
+import logo from "../../../public/imgaaka.png"
 
 export default function UserManagement() {
     const [selectedDate, setSelectedDate] = useState<string>("")
@@ -142,7 +143,7 @@ export default function UserManagement() {
                     printWindow.document.write(`
                     <div class="shipping-label">
                         <div class="header">
-                            <img src="logo-url" alt="AAKA Logo" class="logo">
+                            <img src="https://s3-inventorymanagementwow.s3.ap-south-1.amazonaws.com/imgaaka.png" alt="AAKA Logo" class="logo">
                             <div class="company-name">Night Suits By Aaka</div>
                         </div>
                         <div class="shipping-title">Shipping Address:</div>
