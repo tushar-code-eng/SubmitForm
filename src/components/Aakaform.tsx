@@ -69,9 +69,13 @@ export function AAKAForm() {
 
       alert("User registered/updated successfully!");
       form.reset();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error:", error);
-      alert(error.message);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("An unknown error occurred");
+      }
     } finally {
       setIsSubmitting(false);
     }

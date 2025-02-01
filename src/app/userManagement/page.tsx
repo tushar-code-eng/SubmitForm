@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { mockUsers, type User } from "@/utils/mockData"
+import { type User } from "@/utils/mockData"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -23,7 +23,7 @@ export default function UserManagement() {
                 const data: User[] = await response.json()
                 setUsers(data)
             } catch (err) {
-                console.log("Error fetching users. Please try again later.")
+                console.log("Error fetching users. Please try again later.",err)
             }
         }
 
