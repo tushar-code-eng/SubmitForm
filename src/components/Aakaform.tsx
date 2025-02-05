@@ -100,7 +100,7 @@ export function AAKAForm() {
                 <FormItem>
                   <RequiredFormLabel>Full Name</RequiredFormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} className="border-primary/20" />
+                    <Input placeholder="Enter your name" {...field} className="border-primary/20" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,7 +113,7 @@ export function AAKAForm() {
                 <FormItem>
                   <RequiredFormLabel>Address</RequiredFormLabel>
                   <FormControl>
-                    <Input placeholder="123 Main St, City" {...field} className="border-primary/20" />
+                    <Input placeholder="Enter your address" {...field} className="border-primary/20" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -150,7 +150,7 @@ export function AAKAForm() {
                 <FormItem>
                   <RequiredFormLabel>Zip Code</RequiredFormLabel>
                   <FormControl>
-                    <Input placeholder="123456" {...field} className="border-primary/20" />
+                    <Input placeholder="Enter you zip code" {...field} className="border-primary/20" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -163,7 +163,7 @@ export function AAKAForm() {
                 <FormItem>
                   <RequiredFormLabel>Mobile Number</RequiredFormLabel>
                   <FormControl>
-                    <Input placeholder="9876543210" {...field} className="border-primary/20" />
+                    <Input placeholder="Enter your mobile number" {...field} className="border-primary/20" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -176,7 +176,7 @@ export function AAKAForm() {
                 <FormItem>
                   <FormLabel>Alternate Mobile Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="9876543210" {...field} className="border-primary/20" />
+                    <Input {...field} className="border-primary/20" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
