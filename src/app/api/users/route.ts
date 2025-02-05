@@ -12,8 +12,8 @@ export async function GET(request: Request) {
             users = await prisma.user.findMany({
                 where: {
                     createdAt: {
-                        gte: new Date(`${selectedDate}T00:00:00`), // Start of the selected date
-                        lt: new Date(`${selectedDate}T23:59:59`), // End of the selected date
+                        gte: new Date(`${selectedDate}T00:00:00`),
+                        lt: new Date(`${selectedDate}T23:59:59`),
                     },
                 },
             })

@@ -16,5 +16,25 @@ model User {
   zipCode               String
   mobileNumber          String   @unique
   alternateMobileNumber String?
+  orders                Order[]
   createdAt             DateTime @default(now())
+}
+
+model Order{
+  id                    String   @id @default(uuid())
+  orderDetails          String
+  numOfPieces           Int      
+  numOfParcels          Int      
+  totalAmount           Int
+  trackingId            String
+  trackingCompany       String
+  paymentStatus         paymentStatusEnum
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id])
+  orderDate             DateTime @default(now())
+}
+
+enum paymentStatusEnum {
+  pending
+  paid
 }
