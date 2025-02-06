@@ -11,10 +11,16 @@ import { toast } from "@/hooks/use-toast"
 import logo from "../../../public/imgaaka.png"
 import UserSearchModal from "@/components/UserSearchModal"
 
+import axios from 'axios'
+import AddOrder from "@/components/AddOrder"
+
 export default function UserManagement() {
     const [selectedDate, setSelectedDate] = useState<string>("")
     const [selectedUsers, setSelectedUsers] = useState<User[]>([])
     const [users, setUsers] = useState<User[]>([])
+
+    const [additionalUserArray, setAdditionalUserArray] = useState<any[]>([]);
+    const [isRequestCompleted, setIsRequestCompleted] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -28,9 +34,8 @@ export default function UserManagement() {
                 console.log("Error fetching users. Please try again later.", err)
             }
         }
-
         fetchUsers()
-    }, [selectedDate])
+    }, [selectedDate, isRequestCompleted])
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedDate(e.target.value)
@@ -171,23 +176,31 @@ export default function UserManagement() {
         }
     }
 
+    const handleAddAdditionalUserToDb = async () => {
+        try {
+            const response = await axios.post('/api/additionalUser', {
+                users: additionalUserArray.map((user) => ({ mobileNumber: user.mobileNumber })),
+            });
 
-    const handleUserSelect = (user: User) => {
-        console.log("clicking")
-        setUsers((prev) =>
-            prev.some((userr) => userr.id === user.id)
-                ? prev.filter((userr) => userr.id !== user.id)
-                : [...prev, user]
-        )
-        // setUsers((prev)=>[...prev,user])
-    }
+            console.log('Users updated:', response.data);
+            setIsRequestCompleted(!isRequestCompleted);
+        } catch (error: any) {
+            if (error.response) {
+                console.error('Error response:', error.response.data.message);
+            } else if (error.request) {
+                console.error('Error request:', error.request);
+            } else {
+                console.error('Error message:', error.message);
+            }
+        }
+    };
 
     return (
         <div className="container mx-auto py-10 bg-secondary min-h-screen">
             <h1 className="text-3xl font-bold text-center mb-6 text-primary">AAKA User Management</h1>
             <Card className="w-full bg-white shadow-lg">
                 <CardHeader className="bg-primary text-primary-foreground">
-                    <CardTitle>User Details</CardTitle>
+                    <CardTitle>Customer Details</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="mb-4">
@@ -202,10 +215,7 @@ export default function UserManagement() {
                             className="border-primary/20"
                         />
                     </div>
-                    <UserSearchModal
-                        onUserSelect={handleUserSelect}
-                        selectedUsers={selectedUsers}
-                    />
+                    <UserSearchModal handleAddAdditionalUser={handleAddAdditionalUserToDb} additionalUser={additionalUserArray} setAdditionalUserArray={setAdditionalUserArray} />
                     <div className="mb-4">
                         <p className="text-sm font-medium text-gray-700">Selected Users: {selectedUsers.length}</p>
                     </div>
@@ -229,7 +239,7 @@ export default function UserManagement() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {users.map((user, index) => (
+                                {users.map((user: any, index) => (
                                     <TableRow key={user.id}>
                                         <TableCell>
                                             <Checkbox
@@ -244,6 +254,11 @@ export default function UserManagement() {
                                         <TableCell>{user.zipCode}</TableCell>
                                         <TableCell>{user.mobileNumber}</TableCell>
                                         <TableCell>{user.alternateMobileNumber || "-"}</TableCell>
+                                        <TableCell>
+
+                                            <AddOrder user={users} />
+
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

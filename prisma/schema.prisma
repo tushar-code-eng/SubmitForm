@@ -18,6 +18,7 @@ model User {
   alternateMobileNumber String?
   orders                Order[]
   createdAt             DateTime @default(now())
+  printDates            DateTime[]  //when the print of the customer is taken out.
 }
 
 model Order{
@@ -31,7 +32,7 @@ model Order{
   paymentStatus         paymentStatusEnum
   userId                String
   user                  User     @relation(fields: [userId], references: [id])
-  orderDate             DateTime @default(now())
+  orderDate             DateTime @default(now()) //when the owner added the order record
 }
 
 enum paymentStatusEnum {

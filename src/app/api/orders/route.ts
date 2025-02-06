@@ -47,6 +47,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
+        console.log(body)
         
         const order = await prisma.order.create({
             data: {

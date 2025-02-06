@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogHeader,
     DialogTitle,
@@ -12,12 +13,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Search } from "lucide-react"
+import axios from 'axios';
 
-const UserSearchModal = ({ onUserSelect, selectedUsers }: { onUserSelect: any, selectedUsers: any }) => {
+const UserSearchModal = ({ handleAddAdditionalUser, additionalUser, setAdditionalUserArray }: {
+    handleAddAdditionalUser: any,
+    additionalUser: any,
+    setAdditionalUserArray: any
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [allUsers, setAllUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
+
+
 
     useEffect(() => {
         const fetchAllUsers = async () => {
@@ -50,9 +58,17 @@ const UserSearchModal = ({ onUserSelect, selectedUsers }: { onUserSelect: any, s
         setFilteredUsers(filtered);
     }, [searchTerm, allUsers]);
 
-    const handleUserSelect = (user: any) => {
-        onUserSelect(user);
+    const handleAddAdditionalUserTemp = (user: any) => {
+        setAdditionalUserArray((prevSelectedUsers: any) => {
+            if (prevSelectedUsers.some((selected: any) => selected.id === user.id)) {
+                return prevSelectedUsers.filter((selected: any) => selected.id !== user.id);
+            } else {
+                return [...prevSelectedUsers, user];
+            }
+        });
     };
+
+
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -62,7 +78,7 @@ const UserSearchModal = ({ onUserSelect, selectedUsers }: { onUserSelect: any, s
                     className="gap-2"
                 >
                     <Search className="h-4 w-4" />
-                    Add Users
+                    Add New Order
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[80vh]">
@@ -94,7 +110,7 @@ const UserSearchModal = ({ onUserSelect, selectedUsers }: { onUserSelect: any, s
                                         <TableCell>
                                             <Checkbox
                                                 // checked={selectedUsers.some((selected: any) => selected.id === user.id)}
-                                                onCheckedChange={() => handleUserSelect(user)}
+                                                onCheckedChange={() => handleAddAdditionalUserTemp(user)}
                                             />
                                         </TableCell>
                                         <TableCell>{user.fullName}</TableCell>
@@ -106,6 +122,9 @@ const UserSearchModal = ({ onUserSelect, selectedUsers }: { onUserSelect: any, s
                                 ))}
                             </TableBody>
                         </Table>
+                        <DialogClose onClick={handleAddAdditionalUser}>
+                            Add Selected Users
+                        </DialogClose>
                     </ScrollArea>
                 </div>
             </DialogContent>

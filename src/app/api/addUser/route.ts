@@ -10,11 +10,17 @@ export async function POST(req: NextRequest) {
     if (!fullName || !address || !state || !zipCode || !mobileNumber) {
       return NextResponse.json({ error: "All required fields must be provided." }, { status: 400 });
     }
+    const printDate = new Date();
 
     const user = await prisma.user.upsert({
-      where: { mobileNumber }, // Search by mobile number
-      update: { fullName, address, state, zipCode, alternateMobileNumber }, 
-      create: { fullName, address, state, zipCode, mobileNumber, alternateMobileNumber }, 
+      where: { mobileNumber },
+      update: {
+        fullName, address, state, zipCode, alternateMobileNumber, printDates: {
+          push: printDate
+
+        }
+      },
+      create: { fullName, address, state, zipCode, mobileNumber, alternateMobileNumber, printDates: [printDate] },
     });
 
     return NextResponse.json({ message: "User registered/updated successfully", user }, { status: 201 });
