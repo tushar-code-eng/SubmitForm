@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(request: Request) {
     const url = new URL(request.url)
-    const selectedDate = url.searchParams.get('date') || '' 
+    const selectedDate = url.searchParams.get('date') || ''
 
     try {
         let orders;
@@ -12,15 +12,15 @@ export async function GET(request: Request) {
             orders = await prisma.order.findMany({
                 where: {
                     orderDate: {
-                        gte: new Date(`${selectedDate}T00:00:00`), 
-                        lt: new Date(`${selectedDate}T23:59:59`), 
+                        gte: new Date(`${selectedDate}T00:00:00`),
+                        lt: new Date(`${selectedDate}T23:59:59`),
                     },
                 },
                 include: {
-                    user: true, 
+                    user: true,
                 },
                 orderBy: {
-                    orderDate: 'desc', 
+                    orderDate: 'desc',
                 },
             })
         } else {
@@ -48,7 +48,10 @@ export async function POST(request: Request) {
     try {
         const body = await request.json()
         console.log(body)
-        
+
+        const currentDate = new Date();
+        const indiaTime = new Date(currentDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
+
         const order = await prisma.order.create({
             data: {
                 orderDetails: body.orderDetails,
@@ -58,7 +61,8 @@ export async function POST(request: Request) {
                 trackingId: body.trackingId,
                 trackingCompany: body.trackingCompany,
                 paymentStatus: body.paymentStatus,
-                userId: body.userId
+                userId: body.userId,
+                orderDate: indiaTime,
             },
         })
 
@@ -66,7 +70,7 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error('Error creating order:', error)
         return NextResponse.json(
-            { error: 'Error creating order. Please try again later.' }, 
+            { error: 'Error creating order. Please try again later.' },
             { status: 500 }
         )
     }

@@ -8,17 +8,18 @@ export async function POST(req: NextRequest) {
     if (!fullName || !address || !state || !zipCode || !mobileNumber) {
       return NextResponse.json({ error: "All required fields must be provided." }, { status: 400 });
     }
-    const printDate = new Date();
+    const currentDate = new Date();
+    const indiaTime = new Date(currentDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
 
     const user = await prisma.user.upsert({
       where: { mobileNumber },
       update: {
         fullName, address, state, zipCode, alternateMobileNumber, printDates: {
-          push: printDate
+          push: indiaTime
 
         }
       },
-      create: { fullName, address, state, zipCode, mobileNumber, alternateMobileNumber, printDates: [printDate] },
+      create: { fullName, address, state, zipCode, mobileNumber, alternateMobileNumber, printDates: [indiaTime],createdAt:indiaTime },
     });
 
     return NextResponse.json({ message: "User registered/updated successfully", user }, { status: 201 });

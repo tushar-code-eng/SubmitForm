@@ -20,7 +20,8 @@ export async function POST(
             );
         }
 
-        const date = new Date();
+        const currentDate = new Date();
+        const indiaTime = new Date(currentDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
 
         const updatedUsers = await prisma.user.updateMany({
             where: {
@@ -30,7 +31,7 @@ export async function POST(
             },
             data: {
                 printDates: {
-                    push: date,
+                    push: indiaTime,
                 },
             },
         });

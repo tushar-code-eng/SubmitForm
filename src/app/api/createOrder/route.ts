@@ -32,6 +32,9 @@ export async function POST(request: Request) {
                 where: { mobileNumber },
             })
 
+            const currentDate = new Date();
+            const indiaTime = new Date(currentDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
+
             if (existingUser) {
                 throw new Error("User Already Exists")
             }
@@ -44,6 +47,7 @@ export async function POST(request: Request) {
                     mobileNumber,
                     alternateMobileNumber,
                     printDates: [new Date()],
+                    createdAt: indiaTime,
                 },
             })
 
@@ -59,6 +63,7 @@ export async function POST(request: Request) {
                         trackingCompany: trackingCompany ?? "",
                         paymentStatus: paymentStatus ?? "pending",
                         userId: user.id,
+                        orderDate: indiaTime,
                     },
                 })
                 return { user, order }
