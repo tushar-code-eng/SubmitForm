@@ -13,6 +13,7 @@ import UserSearchModal from "@/components/UserSearchModal"
 
 import axios from 'axios'
 import AddOrder from "@/components/AddOrder"
+import UserOrdersModal from "@/components/UserOrdersModal"
 
 export default function UserManagement() {
     const [selectedDate, setSelectedDate] = useState<string>("")
@@ -236,6 +237,7 @@ export default function UserManagement() {
                                     <TableHead>Zip Code</TableHead>
                                     <TableHead>Mobile Number</TableHead>
                                     <TableHead>Alternate Mobile</TableHead>
+                                    <TableHead>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -255,9 +257,10 @@ export default function UserManagement() {
                                         <TableCell>{user.mobileNumber}</TableCell>
                                         <TableCell>{user.alternateMobileNumber || "-"}</TableCell>
                                         <TableCell>
-
-                                            <AddOrder user={users} />
-
+                                            <div className="flex gap-2">
+                                                <AddOrder user={user.id} />
+                                                <UserOrdersModal userId={user.id} userName={user.fullName} />
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}

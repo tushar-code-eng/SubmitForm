@@ -58,7 +58,6 @@ const AddOrder = ({user}:{user:any}) => {
 
     const handleAddOrder = async () => {
         if (!selectedUser) return
-        console.log(selectedUser)
 
         try {
             const response = await fetch('/api/orders', {
@@ -68,7 +67,7 @@ const AddOrder = ({user}:{user:any}) => {
                 },
                 body: JSON.stringify({
                     ...formData,
-                    userId: selectedUser.id
+                    userId: selectedUser
                 }),
             })
 
