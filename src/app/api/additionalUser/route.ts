@@ -11,13 +11,16 @@ interface RequestBody {
     presentDate: string;
 }
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: Request, res: NextResponse) {
     const { users } = await req.json();
 
     try {
 
         if (!Array.isArray(users) || users.length === 0) {
-            return 'Invalid input data.';
+            return NextResponse.json(
+                { error: 'Select some users to add' },
+                { status: 500 }
+            );
         }
 
         const date = new Date();
@@ -38,6 +41,9 @@ export async function POST(req: NextRequest, res: NextResponse) {
         return NextResponse.json(updatedUsers);
     } catch (error) {
         console.error('Error updating users:', error);
-        return NextResponse.json({ message: "Internal Error" }, { status: 201 });;
+        return NextResponse.json(
+            { error: 'Failed' },
+            { status: 500 }
+        )
     }
 }
