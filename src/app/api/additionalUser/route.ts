@@ -6,16 +6,13 @@ interface UserInput {
     mobileNumber: string;
 }
 
-interface RequestBody {
-    users: UserInput[];
-    presentDate: string;
-}
-
-export async function POST(req: Request, res: NextResponse) {
+// Add proper type annotation for the request parameter and return type
+export async function POST(
+    req: NextRequest // Change Request to NextRequest
+): Promise<NextResponse> { // Add return type annotation
     const { users } = await req.json();
 
     try {
-
         if (!Array.isArray(users) || users.length === 0) {
             return NextResponse.json(
                 { error: 'Select some users to add' },
@@ -44,6 +41,6 @@ export async function POST(req: Request, res: NextResponse) {
         return NextResponse.json(
             { error: 'Failed' },
             { status: 500 }
-        )
+        );
     }
 }
