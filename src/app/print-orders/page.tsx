@@ -77,7 +77,7 @@ export default function UserManagement() {
                 body {
                   font-family: Arial, sans-serif;
                   margin: 0;
-                  padding: 15px;
+                //   padding: 15px;
                   box-sizing: border-box;
                 }
                 .page {
@@ -89,7 +89,7 @@ export default function UserManagement() {
                 }
                 .shipping-label {
                   border: 1px solid #000;
-                //   padding: 5px;
+                  padding: 5px;
                   flex: 1;
                   height: calc((277mm - 65px) / 3);
                   box-sizing: border-box;
