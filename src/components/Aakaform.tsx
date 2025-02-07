@@ -67,7 +67,7 @@ export function AAKAForm() {
         throw new Error(data.error || "Something went wrong");
       }
 
-      alert("User registered/updated successfully!");
+      alert("Thankyou for your order");
       form.reset();
     } catch (error) {
       console.error("Error:", error);
