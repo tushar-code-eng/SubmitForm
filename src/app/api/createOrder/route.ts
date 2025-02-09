@@ -1,4 +1,4 @@
-// app/api/customer-order/route.ts
+// At the top of your file, add:
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 
@@ -32,12 +32,15 @@ export async function POST(request: Request) {
                 where: { mobileNumber },
             })
 
-            const currentDate = new Date();
-            const indiaTime = new Date(currentDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
-
             if (existingUser) {
                 throw new Error("User Already Exists")
             }
+
+            // Get current time in IST
+            const currentDate = new Date()
+            // Add 5 hours and 30 minutes to get IST
+            const istDate = new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000))
+
             const user = await tx.user.create({
                 data: {
                     fullName,
@@ -46,8 +49,8 @@ export async function POST(request: Request) {
                     zipCode,
                     mobileNumber,
                     alternateMobileNumber,
-                    printDates: [new Date()],
-                    createdAt: indiaTime,
+                    printDates: [istDate],
+                    createdAt: istDate,
                 },
             })
 
@@ -63,7 +66,7 @@ export async function POST(request: Request) {
                         trackingCompany: trackingCompany ?? "",
                         paymentStatus: paymentStatus ?? "pending",
                         userId: user.id,
-                        orderDate: indiaTime,
+                        orderDate: istDate,
                     },
                 })
                 return { user, order }

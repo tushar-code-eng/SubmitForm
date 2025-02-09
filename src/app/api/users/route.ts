@@ -4,12 +4,18 @@ import { prisma } from '@/lib/prisma'
 export async function GET(request: Request) {
     const url = new URL(request.url)
     const selectedDate = url.searchParams.get('date') || '' // Extract date from query parameters
+    console.log(selectedDate)
 
-    const startOfDay = new Date(`${selectedDate}T00:00:00.000Z`);
-    const endOfDay = new Date(`${selectedDate}T23:59:59.999Z`);
+    const startOfDay = new Date(selectedDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(selectedDate);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    console.log("start - >", startOfDay)
+    console.log("end - >", endOfDay)
 
     try {
-
         const tempUsers = await prisma.user.findMany()
 
         if (selectedDate) {
@@ -19,8 +25,11 @@ export async function GET(request: Request) {
                     return printDate >= startOfDay && printDate <= endOfDay;
                 })
             );
+            console.log(users)
             return NextResponse.json(users)
         }
+
+        console.log("Here", tempUsers)
 
         return NextResponse.json(tempUsers)
 

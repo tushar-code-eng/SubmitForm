@@ -6,22 +6,23 @@ interface UserInput {
     mobileNumber: string;
 }
 
-// Add proper type annotation for the request parameter and return type
 export async function POST(
-    req: NextRequest // Change Request to NextRequest
-): Promise<NextResponse> { // Add return type annotation
-    const { users } = await req.json();
-
+    req: NextRequest
+): Promise<NextResponse> {
     try {
+        const { users } = await req.json() as { users: UserInput[] };
+
         if (!Array.isArray(users) || users.length === 0) {
             return NextResponse.json(
                 { error: 'Select some users to add' },
-                { status: 500 }
+                { status: 400 }  // Changed to 400 as it's a client-side error
             );
         }
 
+        // Get current time in IST
         const currentDate = new Date();
-        const indiaTime = new Date(currentDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
+        // Add 5 hours and 30 minutes to get IST
+        const istDate = new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000));
 
         const updatedUsers = await prisma.user.updateMany({
             where: {
@@ -31,16 +32,24 @@ export async function POST(
             },
             data: {
                 printDates: {
-                    push: indiaTime,
+                    push: istDate,
                 },
             },
         });
 
-        return NextResponse.json(updatedUsers);
+        return NextResponse.json({
+            success: true,
+            message: 'Users updated successfully',
+            data: updatedUsers
+        });
     } catch (error) {
         console.error('Error updating users:', error);
         return NextResponse.json(
-            { error: 'Failed' },
+            { 
+                success: false,
+                error: 'Failed to update users',
+                details: error instanceof Error ? error.message : 'Unknown error'
+            },
             { status: 500 }
         );
     }

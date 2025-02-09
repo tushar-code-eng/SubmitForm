@@ -39,6 +39,7 @@ export default function UserManagement() {
     }, [selectedDate, isRequestCompleted])
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log(e.target.value)
         setSelectedDate(e.target.value)
     }
 
