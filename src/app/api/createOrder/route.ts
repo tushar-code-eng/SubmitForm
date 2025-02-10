@@ -1,4 +1,3 @@
-// At the top of your file, add:
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 
@@ -8,7 +7,6 @@ export async function POST(request: Request) {
     try {
         const body = await request.json()
 
-        // Extract user and order data
         const {
             fullName,
             address,
@@ -25,9 +23,7 @@ export async function POST(request: Request) {
             paymentStatus,
         } = body
 
-        // Create or update user and create order in a transaction
         const result = await prisma.$transaction(async (tx) => {
-            // Create user
             const existingUser = await tx.user.findUnique({
                 where: { mobileNumber },
             })
@@ -36,9 +32,7 @@ export async function POST(request: Request) {
                 throw new Error("User Already Exists")
             }
 
-            // Get current time in IST
             const currentDate = new Date()
-            // Add 5 hours and 30 minutes to get IST
             const istDate = new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000))
 
             const user = await tx.user.create({
@@ -54,7 +48,6 @@ export async function POST(request: Request) {
                 },
             })
 
-            // Only create order if at least one order field is provided
             if (orderDetails || numOfPieces || numOfParcels || totalAmount || trackingId || trackingCompany || paymentStatus) {
                 const order = await tx.order.create({
                     data: {

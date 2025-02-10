@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { indianRegions } from "@/utils/IndianStates"
+import { X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -13,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useDebouncedValue } from "@/hooks/useDebouncedValue"
+import axios from "axios"
 
 function RequiredFormLabel({ children }: { children: React.ReactNode }) {
     return (
@@ -24,7 +27,6 @@ function RequiredFormLabel({ children }: { children: React.ReactNode }) {
 }
 
 const formSchema = z.object({
-    // User details (required)
     fullName: z.string().min(2, { message: "Full Name must be at least 2 characters." }),
     address: z.string().min(5, { message: "Address must be at least 5 characters." }),
     state: z.string().min(1, { message: "Please select a state." }),
@@ -36,7 +38,6 @@ const formSchema = z.object({
         .or(z.literal(""))
         .optional(),
 
-    // Order details (all optional)
     orderDetails: z.string().optional(),
     numOfPieces: z
         .string()
@@ -60,8 +61,61 @@ const formSchema = z.object({
     paymentStatus: z.enum(["pending", "paid"]).optional(),
 })
 
+
+
+function UserSuggestions({ users, onClose, onSelect }: { users: any, onClose: any, onSelect: any }) {
+    if (!users?.length) return null;
+    console.log("working?")
+
+    return (
+        <div className="absolute z-10 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto mt-1">
+            <div className="flex justify-between items-center p-2 border-b">
+                <span className="text-sm font-medium">Suggestions</span>
+                <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+                    <X size={16} />
+                </button>
+            </div>
+            <div className="p-2">
+                {users.map((user: any, index: any) => (
+                    <div
+                        key={index}
+                        className="p-2 hover:bg-gray-100 rounded-md"
+                        // onClick={() => onSelect(user)}
+                    >
+                        <div className="text-sm font-medium">{user.fullName}</div>
+                        <div className="text-xs text-gray-500">{user.address}</div>
+                        <div className="text-xs text-gray-500">{user.mobileNumber}</div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+
 export function AddCustomerDetailForm() {
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [nameValue, setNameValue] = useState("")
+    const [showSuggestions, setShowSuggestions] = useState(false)
+    const debouncedSearch = useDebouncedValue(nameValue, 500)
+    const [users, setUsers] = useState<any[]>([])
+
+    useEffect(() => {
+        async function fetchByName() {
+            if (debouncedSearch) {
+                const response = await axios.get(`/api/users/searchByName?name=${encodeURIComponent(debouncedSearch)}`);
+                const users = response.data;
+                console.log(users);
+                setUsers(users)
+                setShowSuggestions(true);
+                console.log(showSuggestions)
+            } else {
+                setUsers([]);
+                setShowSuggestions(false);
+            }
+        }
+        fetchByName()
+    }, [debouncedSearch]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -81,6 +135,13 @@ export function AddCustomerDetailForm() {
             paymentStatus: undefined,
         },
     })
+
+    const handleUserSelect = (user: any) => {
+        form.setValue('fullName', user.fullName);
+        form.setValue('address', user.address);
+        form.setValue('mobileNumber', user.mobileNumber);
+        setShowSuggestions(false);
+    };
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true)
@@ -136,12 +197,27 @@ export function AddCustomerDetailForm() {
                                     <FormItem>
                                         <RequiredFormLabel>Full Name</RequiredFormLabel>
                                         <FormControl>
-                                            <Input placeholder="Enter your name" {...field} className="border-primary/20" />
+                                            <Input
+                                                placeholder="Enter your name"
+                                                value={field.value}
+                                                onChange={(e) => {
+                                                    field.onChange(e);
+                                                    setNameValue(e.target.value);
+                                                }}
+                                                className="border-primary/20"
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
+                            {showSuggestions && (
+                                <UserSuggestions
+                                    users={users}
+                                    onClose={() => setShowSuggestions(false)}
+                                    onSelect={handleUserSelect}
+                                />
+                            )}
 
                             <FormField
                                 control={form.control}

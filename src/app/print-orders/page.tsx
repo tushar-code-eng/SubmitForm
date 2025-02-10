@@ -19,6 +19,10 @@ export default function UserManagement() {
     const [selectedDate, setSelectedDate] = useState<string>("")
     const [selectedUsers, setSelectedUsers] = useState<User[]>([])
     const [users, setUsers] = useState<User[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 
     const [additionalUserArray, setAdditionalUserArray] = useState<any[]>([]);
     const [isRequestCompleted, setIsRequestCompleted] = useState<boolean>(false);
@@ -31,6 +35,7 @@ export default function UserManagement() {
 
                 const data: User[] = await response.json()
                 setUsers(data)
+                setFilteredUsers(data)
             } catch (err) {
                 console.log("Error fetching users. Please try again later.", err)
             }
@@ -54,6 +59,56 @@ export default function UserManagement() {
     const handleSelectAll = (checked: boolean) => {
         setSelectedUsers(checked ? [...users] : [])
     }
+
+
+    const handleDeleteSelectedUsers = async () => {
+        if (!selectedDate) {
+            toast({
+                title: "No Date Selected",
+                description: "Please select a date to delete print records.",
+                variant: "destructive"
+            })
+            return
+        }
+
+        if (selectedUsers.length === 0) {
+            toast({
+                title: "No Users Selected",
+                description: "Please select users to delete print records.",
+                variant: "destructive"
+            })
+            return
+        }
+
+        try {
+            setIsLoading(true)
+            const response = await axios.delete('/api/deletePrint', {
+                data: {
+                    userIds: selectedUsers.map(user => user.id),
+                    printDate: selectedDate
+                }
+            })
+
+            console.log(response)
+
+            toast({
+                title: "Success",
+                description: "Print records deleted successfully.",
+            })
+
+            setSelectedUsers([])
+            setIsRequestCompleted(prev => !prev)
+        } catch (error: any) {
+            toast({
+                title: "Error",
+                description: error.response?.data?.message || "Failed to delete print records.",
+                variant: "destructive"
+            })
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
 
     const handlePrintSelectedUsers = () => {
         if (selectedUsers.length === 0) {
@@ -197,6 +252,20 @@ export default function UserManagement() {
         }
     };
 
+    useEffect(() => {
+        const filtered = users.filter((user: any) => {
+            const searchLower = searchTerm.toLowerCase();
+            return (
+                user.fullName.toLowerCase().includes(searchLower) ||
+                user.mobileNumber.includes(searchLower) ||
+                user.address.toLowerCase().includes(searchLower) ||
+                user.state.toLowerCase().includes(searchLower) ||
+                (user.registrationDate && user.registrationDate.includes(searchTerm))
+            );
+        });
+        setFilteredUsers(filtered);
+    }, [searchTerm, users]);
+
     return (
         <div className="container mx-auto py-10 bg-secondary min-h-screen">
             <h1 className="text-3xl font-bold text-center mb-6 text-primary">AAKA User Management</h1>
@@ -217,7 +286,22 @@ export default function UserManagement() {
                             className="border-primary/20"
                         />
                     </div>
-                    <UserSearchModal handleAddAdditionalUser={handleAddAdditionalUserToDb} additionalUser={additionalUserArray} setAdditionalUserArray={setAdditionalUserArray} />
+                    <div className="flex items-center gap-3" >
+                        <UserSearchModal handleAddAdditionalUser={handleAddAdditionalUserToDb} additionalUser={additionalUserArray} setAdditionalUserArray={setAdditionalUserArray} />
+                        <Button
+                            onClick={handleDeleteSelectedUsers}
+                            disabled={selectedUsers.length === 0 || !selectedDate || isLoading}
+                            variant="destructive"
+                        >
+                            Delete Print Records
+                        </Button>
+                        <Input
+                            placeholder="Search by name, address, state or date..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full"
+                        />
+                    </div>
                     <div className="mb-4">
                         <p className="text-sm font-medium text-gray-700">Selected Users: {selectedUsers.length}</p>
                     </div>
@@ -242,7 +326,7 @@ export default function UserManagement() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {users.map((user: any, index) => (
+                                {filteredUsers.map((user: any, index) => (
                                     <TableRow key={user.id}>
                                         <TableCell>
                                             <Checkbox
@@ -278,3 +362,4 @@ export default function UserManagement() {
         </div>
     )
 }
+

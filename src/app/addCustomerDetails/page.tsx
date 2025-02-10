@@ -1,4 +1,3 @@
-import { AAKAForm } from "@/components/Aakaform"
 import logo from '../../../public/imgaaka.png'
 import { AddCustomerDetailForm } from "@/components/AddCustomerDetailForm"
 

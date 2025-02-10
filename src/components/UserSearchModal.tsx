@@ -50,6 +50,7 @@ const UserSearchModal = ({ handleAddAdditionalUser, additionalUser, setAdditiona
             const searchLower = searchTerm.toLowerCase();
             return (
                 user.fullName.toLowerCase().includes(searchLower) ||
+                user.mobileNumber.includes(searchLower) ||
                 user.address.toLowerCase().includes(searchLower) ||
                 user.state.toLowerCase().includes(searchLower) ||
                 (user.registrationDate && user.registrationDate.includes(searchTerm))

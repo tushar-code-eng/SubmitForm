@@ -8,23 +8,46 @@ export async function POST(req: NextRequest) {
     if (!fullName || !address || !state || !zipCode || !mobileNumber) {
       return NextResponse.json({ error: "All required fields must be provided." }, { status: 400 });
     }
+
     const currentDate = new Date();
-    const indiaTime = new Date(currentDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
+    const istDate = new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000));
 
     const user = await prisma.user.upsert({
       where: { mobileNumber },
       update: {
-        fullName, address, state, zipCode, alternateMobileNumber, printDates: {
-          push: indiaTime
-
+        fullName,
+        address,
+        state,
+        zipCode,
+        alternateMobileNumber,
+        printDates: {
+          push: istDate
         }
       },
-      create: { fullName, address, state, zipCode, mobileNumber, alternateMobileNumber, printDates: [indiaTime],createdAt:indiaTime },
+      create: {
+        fullName,
+        address,
+        state,
+        zipCode,
+        mobileNumber,
+        alternateMobileNumber,
+        printDates: [istDate],
+        createdAt: istDate
+      },
     });
 
-    return NextResponse.json({ message: "User registered/updated successfully", user }, { status: 201 });
+    return NextResponse.json({
+      success: true,
+      message: "User registered/updated successfully",
+      data: user
+    }, { status: 201 });
+
   } catch (error) {
     console.error("Error registering user:", error);
-    return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
+    return NextResponse.json({
+      success: false,
+      error: "Failed to register/update user",
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 });
   }
 }

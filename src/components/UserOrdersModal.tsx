@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/hooks/use-toast"
 import axios from 'axios';
+import { format } from "date-fns";
+import { toZonedTime } from 'date-fns-tz';
 
 interface Order {
     id: string;
@@ -110,7 +112,10 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                         return (
                             <Card key={order.id}>
                                 <CardHeader>
-                                    <CardTitle>Order Date: {new Date(order.orderDate).toLocaleDateString()}</CardTitle>
+                                    <CardTitle>Order Date : {(() => {
+                                        const [year, month, day] = order.orderDate.split("T")[0].split("-");
+                                        return `${day}/${month}/${year}`;
+                                    })()}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="grid gap-4">
