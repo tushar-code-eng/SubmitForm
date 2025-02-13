@@ -86,7 +86,7 @@ const AddOrder = ({user}:{user:any}) => {
                 totalAmount: 0,
                 trackingId: '',
                 trackingCompany: '',
-                paymentStatus: 'pending'
+                paymentStatus: 'paid'
             })
             setIsDialogOpen(false)
 

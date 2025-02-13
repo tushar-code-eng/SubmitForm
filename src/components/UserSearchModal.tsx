@@ -123,7 +123,7 @@ const UserSearchModal = ({ handleAddAdditionalUser, additionalUser, setAdditiona
                                 ))}
                             </TableBody>
                         </Table>
-                        <DialogClose onClick={handleAddAdditionalUser}>
+                        <DialogClose className='border p-2' onClick={handleAddAdditionalUser}>
                             Add Selected Users
                         </DialogClose>
                     </ScrollArea>

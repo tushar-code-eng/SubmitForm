@@ -267,7 +267,7 @@ export default function UserManagement() {
         );
         const uniqueUsers = new Map();
 
-        filteredData.forEach((order:any) => {
+        filteredData.forEach((order: any) => {
             if (!uniqueUsers.has(order.user.id)) {
                 uniqueUsers.set(order.user.id, order.user);
             }
@@ -278,7 +278,7 @@ export default function UserManagement() {
     }
 
     useEffect(() => {
-        if(editingTrackingIds){
+        if (editingTrackingIds) {
             const filtered = trackingIdUsers.filter((user: any) => {
                 const searchLower = searchTerm.toLowerCase();
                 return (
@@ -290,7 +290,7 @@ export default function UserManagement() {
                 );
             });
             setTrackingIdFilter(filtered);
-        }else{
+        } else {
             const filtered = users.filter((user: any) => {
                 const searchLower = searchTerm.toLowerCase();
                 return (
@@ -303,7 +303,7 @@ export default function UserManagement() {
             });
             setFilteredUsers(filtered);
         }
-    }, [searchTerm, users,trackingIdUsers]);
+    }, [searchTerm, users, trackingIdUsers]);
 
     return (
         <div className="container mx-auto py-10 bg-secondary min-h-screen">

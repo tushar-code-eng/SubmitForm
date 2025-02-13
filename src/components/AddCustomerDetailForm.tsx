@@ -16,6 +16,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue"
 import axios from "axios"
+import UserOrdersModal from "./UserOrdersModal"
+import AddOrder from "./AddOrder"
 
 function RequiredFormLabel({ children }: { children: React.ReactNode }) {
     return (
@@ -80,11 +82,19 @@ function UserSuggestions({ users, onClose, onSelect }: { users: any, onClose: an
                     <div
                         key={index}
                         className="p-2 hover:bg-gray-100 rounded-md"
-                        // onClick={() => onSelect(user)}
+                    // onClick={() => onSelect(user)}
                     >
                         <div className="text-sm font-medium">{user.fullName}</div>
                         <div className="text-xs text-gray-500">{user.address}</div>
                         <div className="text-xs text-gray-500">{user.mobileNumber}</div>
+                        <div className="flex w-full items-center justify-around mt-2 border-t border-[#9e9d9d]">
+                            <div>
+                                <AddOrder user={user.id} />
+                            </div>
+                            <div>
+                                <UserOrdersModal userId={user.id} userName={user.fullName} />
+                            </div>
+                        </div>
                     </div>
                 ))}
             </div>

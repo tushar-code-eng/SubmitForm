@@ -68,6 +68,28 @@ export async function POST(request: Request) {
             },
         })
 
+        const user = await prisma.user.findUnique({
+            where: {
+                id: body.userId,
+            },
+            select: {
+                printDates: true,
+            },
+        });
+
+        if (user && !user.printDates.includes(istDate)) {
+            await prisma.user.update({
+                where: {
+                    id: body.userId,
+                },
+                data: {
+                    printDates: {
+                        push: istDate,
+                    },
+                },
+            });
+        }
+
         return NextResponse.json(order)
     } catch (error) {
         console.error('Error creating order:', error)
