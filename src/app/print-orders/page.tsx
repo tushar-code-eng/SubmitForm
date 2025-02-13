@@ -24,8 +24,14 @@ export default function UserManagement() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 
+
+    const [trackingIdUsers, setTrackingIdUsers] = useState<User[]>([])
+    const [trackingIdFilter, setTrackingIdFilter] = useState<User[]>([])
+
     const [additionalUserArray, setAdditionalUserArray] = useState<any[]>([]);
     const [isRequestCompleted, setIsRequestCompleted] = useState<boolean>(false);
+
+    const [editingTrackingIds, setEditingTrackingIds] = useState(false)
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -44,8 +50,8 @@ export default function UserManagement() {
     }, [selectedDate, isRequestCompleted])
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(e.target.value)
         setSelectedDate(e.target.value)
+        setEditingTrackingIds(false)
     }
 
     const handleUserSelection = (user: User) => {
@@ -252,19 +258,52 @@ export default function UserManagement() {
         }
     };
 
-    useEffect(() => {
-        const filtered = users.filter((user: any) => {
-            const searchLower = searchTerm.toLowerCase();
-            return (
-                user.fullName.toLowerCase().includes(searchLower) ||
-                user.mobileNumber.includes(searchLower) ||
-                user.address.toLowerCase().includes(searchLower) ||
-                user.state.toLowerCase().includes(searchLower) ||
-                (user.registrationDate && user.registrationDate.includes(searchTerm))
-            );
+    const handleEditingTrackingIds = async () => {
+        setEditingTrackingIds(!editingTrackingIds)
+        const response = await axios.get(`/api/orders?date=${selectedDate}`)
+        const orderData = response.data
+        const filteredData = await orderData.filter((item: any) =>
+            !item.trackingId || !item.trackingCompany
+        );
+        const uniqueUsers = new Map();
+
+        filteredData.forEach((order:any) => {
+            if (!uniqueUsers.has(order.user.id)) {
+                uniqueUsers.set(order.user.id, order.user);
+            }
         });
-        setFilteredUsers(filtered);
-    }, [searchTerm, users]);
+
+        const users = Array.from(uniqueUsers.values());
+        setTrackingIdUsers(users);
+    }
+
+    useEffect(() => {
+        if(editingTrackingIds){
+            const filtered = trackingIdUsers.filter((user: any) => {
+                const searchLower = searchTerm.toLowerCase();
+                return (
+                    user.fullName.toLowerCase().includes(searchLower) ||
+                    user.mobileNumber.includes(searchLower) ||
+                    user.address.toLowerCase().includes(searchLower) ||
+                    user.state.toLowerCase().includes(searchLower) ||
+                    (user.registrationDate && user.registrationDate.includes(searchTerm))
+                );
+            });
+            setTrackingIdFilter(filtered);
+        }else{
+            const filtered = users.filter((user: any) => {
+                const searchLower = searchTerm.toLowerCase();
+                return (
+                    user.fullName.toLowerCase().includes(searchLower) ||
+                    user.mobileNumber.includes(searchLower) ||
+                    user.address.toLowerCase().includes(searchLower) ||
+                    user.state.toLowerCase().includes(searchLower) ||
+                    (user.registrationDate && user.registrationDate.includes(searchTerm))
+                );
+            });
+            setFilteredUsers(filtered);
+        }
+    }, [searchTerm, users,trackingIdUsers]);
 
     return (
         <div className="container mx-auto py-10 bg-secondary min-h-screen">
@@ -286,7 +325,7 @@ export default function UserManagement() {
                             className="border-primary/20"
                         />
                     </div>
-                    <div className="flex items-center gap-3" >
+                    <div className="flex items-center justify-center gap-3" >
                         <UserSearchModal handleAddAdditionalUser={handleAddAdditionalUserToDb} additionalUser={additionalUserArray} setAdditionalUserArray={setAdditionalUserArray} />
                         <Button
                             onClick={handleDeleteSelectedUsers}
@@ -299,8 +338,11 @@ export default function UserManagement() {
                             placeholder="Search by name, address, state or date..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full"
+                            className=""
                         />
+                        <div className={`text-center text-sm font-semibold px-2 py-1 rounded-lg cursor-pointer ${editingTrackingIds ? "bg-red-500 text-white" : " text-black"}`} onClick={handleEditingTrackingIds}>
+                            Edit TrackingIds
+                        </div>
                     </div>
                     <div className="mb-4">
                         <p className="text-sm font-medium text-gray-700">Selected Users: {selectedUsers.length}</p>
@@ -326,29 +368,57 @@ export default function UserManagement() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredUsers.map((user: any, index) => (
-                                    <TableRow key={user.id}>
-                                        <TableCell>
-                                            <Checkbox
-                                                checked={selectedUsers.some((selectedUser) => selectedUser.id === user.id)}
-                                                onCheckedChange={() => handleUserSelection(user)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>{index + 1}</TableCell>
-                                        <TableCell>{user.fullName}</TableCell>
-                                        <TableCell>{user.address}</TableCell>
-                                        <TableCell>{user.state}</TableCell>
-                                        <TableCell>{user.zipCode}</TableCell>
-                                        <TableCell>{user.mobileNumber}</TableCell>
-                                        <TableCell>{user.alternateMobileNumber || "-"}</TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-2">
-                                                <AddOrder user={user.id} />
-                                                <UserOrdersModal userId={user.id} userName={user.fullName} />
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {
+                                    editingTrackingIds ?
+                                        (trackingIdFilter.map((user: any, index) => (
+                                            <TableRow key={user.id}>
+                                                <TableCell>
+                                                    <Checkbox
+                                                        checked={selectedUsers.some((selectedUser) => selectedUser.id === user.id)}
+                                                        onCheckedChange={() => handleUserSelection(user)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>{index + 1}</TableCell>
+                                                <TableCell>{user.fullName}</TableCell>
+                                                <TableCell>{user.address}</TableCell>
+                                                <TableCell>{user.state}</TableCell>
+                                                <TableCell>{user.zipCode}</TableCell>
+                                                <TableCell>{user.mobileNumber}</TableCell>
+                                                <TableCell>{user.alternateMobileNumber || "-"}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex gap-2">
+                                                        <AddOrder user={user.id} />
+                                                        <UserOrdersModal userId={user.id} userName={user.fullName} />
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )))
+                                        : (
+                                            filteredUsers.map((user: any, index) => (
+                                                <TableRow key={user.id}>
+                                                    <TableCell>
+                                                        <Checkbox
+                                                            checked={selectedUsers.some((selectedUser) => selectedUser.id === user.id)}
+                                                            onCheckedChange={() => handleUserSelection(user)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>{index + 1}</TableCell>
+                                                    <TableCell>{user.fullName}</TableCell>
+                                                    <TableCell>{user.address}</TableCell>
+                                                    <TableCell>{user.state}</TableCell>
+                                                    <TableCell>{user.zipCode}</TableCell>
+                                                    <TableCell>{user.mobileNumber}</TableCell>
+                                                    <TableCell>{user.alternateMobileNumber || "-"}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex gap-2">
+                                                            <AddOrder user={user.id} />
+                                                            <UserOrdersModal userId={user.id} userName={user.fullName} />
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )
+                                }
                             </TableBody>
                         </Table>
                     </div>
