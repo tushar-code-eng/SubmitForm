@@ -41,8 +41,14 @@ export default function UserManagement() {
 
                 const data: User[] = await response.json()
                 console.log(data)
-                setUsers(data)
-                setFilteredUsers(data)
+
+                // Sort the users alphabetically by fullName
+                const sortedUsers = [...data].sort((a, b) =>
+                    a.fullName.localeCompare(b.fullName)
+                )
+
+                setUsers(sortedUsers)
+                setFilteredUsers(sortedUsers)
             } catch (err) {
                 console.log("Error fetching users. Please try again later.", err)
             }
@@ -278,21 +284,27 @@ export default function UserManagement() {
         });
 
         const users = Array.from(uniqueUsers.values());
-        setTrackingIdUsers(users);
+        // Sort tracking ID users alphabetically
+        const sortedUsers = [...users].sort((a, b) =>
+            a.fullName.localeCompare(b.fullName)
+        );
+        setTrackingIdUsers(sortedUsers);
     }
 
     useEffect(() => {
         if (editingTrackingIds) {
-            const filtered = trackingIdUsers.filter((user: any) => {
-                const searchLower = searchTerm.toLowerCase();
-                return (
-                    user.fullName.toLowerCase().includes(searchLower) ||
-                    user.mobileNumber.includes(searchLower) ||
-                    user.address.toLowerCase().includes(searchLower) ||
-                    user.state.toLowerCase().includes(searchLower) ||
-                    (user.registrationDate && user.registrationDate.includes(searchTerm))
-                );
-            });
+            const filtered = trackingIdUsers
+                .filter((user: any) => {
+                    const searchLower = searchTerm.toLowerCase();
+                    return (
+                        user.fullName.toLowerCase().includes(searchLower) ||
+                        user.mobileNumber.includes(searchLower) ||
+                        user.address.toLowerCase().includes(searchLower) ||
+                        user.state.toLowerCase().includes(searchLower) ||
+                        (user.registrationDate && user.registrationDate.includes(searchTerm))
+                    );
+                })
+                .sort((a, b) => a.fullName.localeCompare(b.fullName));
             setTrackingIdFilter(filtered);
         } else {
             const filtered = users.filter((user: any) => {
@@ -305,6 +317,7 @@ export default function UserManagement() {
                     (user.registrationDate && user.registrationDate.includes(searchTerm))
                 );
             });
+            // No need to sort filtered users as they inherit the sort from users
             setFilteredUsers(filtered);
         }
     }, [searchTerm, users, trackingIdUsers]);
