@@ -60,6 +60,7 @@ export async function POST(request: Request) {
                 numOfPieces: body.numOfPieces,
                 numOfParcels: body.numOfParcels,
                 totalAmount: body.totalAmount,
+                orderAddress:body.orderAddress, ////////////////////////
                 trackingId: body.trackingId,
                 trackingCompany: body.trackingCompany,
                 paymentStatus: body.paymentStatus,

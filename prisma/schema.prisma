@@ -9,30 +9,33 @@ datasource db {
 }
 
 model User {
-  id                    String   @id @default(uuid())
+  id                    String     @id @default(uuid())
   fullName              String
   address               String
   state                 String
   zipCode               String
-  mobileNumber          String   @unique
+  mobileNumber          String     @unique
   alternateMobileNumber String?
   orders                Order[]
-  createdAt             DateTime 
-  printDates            DateTime[]  //when the print of the customer is taken out.
+  createdAt             DateTime
+  printDates            DateTime[] //when the print of the customer is taken out.
 }
 
-model Order{
-  id                    String   @id @default(uuid())
-  orderDetails          String
-  numOfPieces           Int      
-  numOfParcels          Int      
-  totalAmount           Int
-  trackingId            String
-  trackingCompany       String
-  paymentStatus         paymentStatusEnum
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id])
-  orderDate             DateTime //when the owner added the order record
+model Order {
+  id              String            @id @default(uuid())
+  orderDetails    String
+  numOfPieces     Int
+  numOfParcels    Int
+  totalAmount     Int
+  orderAddress    String            @default("")
+  orderState      String            @default("")
+  orderZipCode    String            @default("")
+  trackingId      String
+  trackingCompany String
+  paymentStatus   paymentStatusEnum
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+  orderDate       DateTime //when the owner added the order record
 }
 
 enum paymentStatusEnum {

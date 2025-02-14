@@ -6,11 +6,12 @@ export async function GET(request: Request) {
     const nameValue = url.searchParams.get('name') || '' // Extract nameValue from query parameters
     console.log(nameValue)
 
+    const trimmedNameValue = nameValue.trim();
     try {
         const users = await prisma.user.findMany({
             where: {
                 fullName: {
-                    startsWith: nameValue,
+                    startsWith: trimmedNameValue,
                     mode: 'insensitive',
                 },
             },

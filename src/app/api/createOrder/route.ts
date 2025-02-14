@@ -18,24 +18,25 @@ export async function POST(request: Request) {
             numOfPieces,
             numOfParcels,
             totalAmount,
+            orderAddress,
+            orderState,
+            orderZipCode,
             trackingId,
             trackingCompany,
             paymentStatus,
         } = body
 
-        const result = await prisma.$transaction(async (tx) => {
-            const existingUser = await tx.user.findUnique({
-                where: { mobileNumber },
-            })
+        const currentDate = new Date()
+        const istDate = new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000))
 
-            if (existingUser) {
-                throw new Error("User Already Exists")
-            }
+        // Check if user exists
+        let user = await prisma.user.findUnique({
+            where: { mobileNumber },
+        })
 
-            const currentDate = new Date()
-            const istDate = new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000))
-
-            const user = await tx.user.create({
+        if (!user) {
+            // Create new user if they don't exist
+            user = await prisma.user.create({
                 data: {
                     fullName,
                     address,
@@ -47,33 +48,57 @@ export async function POST(request: Request) {
                     createdAt: istDate,
                 },
             })
+        } else {
+            // Update user's printDates if they exist
+            user = await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    printDates: {
+                        push: istDate
+                    }
+                }
+            })
+        }
 
-            if (orderDetails || numOfPieces || numOfParcels || totalAmount || trackingId || trackingCompany || paymentStatus) {
-                const order = await tx.order.create({
-                    data: {
-                        orderDetails: orderDetails ?? "",
-                        numOfPieces: numOfPieces ?? 0,
-                        numOfParcels: numOfParcels ?? 0,
-                        totalAmount: totalAmount ?? 0,
-                        trackingId: trackingId ?? "",
-                        trackingCompany: trackingCompany ?? "",
-                        paymentStatus: paymentStatus ?? "pending",
-                        userId: user.id,
-                        orderDate: istDate,
-                    },
-                })
-                return { user, order }
+        let order = null;
+        if (orderDetails || numOfPieces || numOfParcels || totalAmount || trackingId || trackingCompany || paymentStatus) {
+            order = await prisma.order.create({
+                data: {
+                    orderDetails: orderDetails,
+                    numOfPieces: numOfPieces ?? 0,
+                    numOfParcels: numOfParcels ?? 0,
+                    totalAmount: totalAmount ?? 0,
+                    orderAddress: orderAddress || address,
+                    orderState: orderState || state,
+                    orderZipCode: orderZipCode || zipCode,
+                    trackingId: trackingId ?? "",
+                    trackingCompany: trackingCompany ?? "",
+                    paymentStatus: paymentStatus ?? "pending",
+                    userId: user.id,
+                    orderDate: istDate,
+                },
+            })
+        }
+
+        // Fetch the updated user with orders
+        const updatedUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            include: {
+                orders: true
             }
-
-            return { user }
         })
 
-        return NextResponse.json(result)
+        return NextResponse.json({
+            user: updatedUser,
+            newOrder: order
+        })
     } catch (error) {
         console.error("Error processing request:", error)
         return NextResponse.json(
-            { error: "Failed to process request" },
+            { error: error instanceof Error ? error.message : "Failed to process request" },
             { status: 500 }
         )
+    } finally {
+        await prisma.$disconnect()
     }
 }

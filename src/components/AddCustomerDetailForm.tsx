@@ -40,24 +40,24 @@ const formSchema = z.object({
         .or(z.literal(""))
         .optional(),
 
-    orderDetails: z.string().optional(),
-    numOfPieces: z
-        .string()
-        .transform(value => (value === "" ? 0 : Number(value)))  // Converts to number or 0 if empty
-        .refine(value => value >= 0, { message: "Number of pieces cannot be negative." })
-        .optional(),
+    orderDetails: z.string().min(2, { message: "Order details cannot be empty" }),
+    numOfPieces: z.union([
+        z.string().transform(val => val === '' ? undefined : Number(val)),
+        z.number()
+    ]).optional(),
 
-    numOfParcels: z
-        .string()
-        .transform(value => (value === "" ? 0 : Number(value)))  // Converts to number or 0 if empty
-        .refine(value => value >= 0, { message: "Number of parcels cannot be negative." })
-        .optional(),
+    numOfParcels: z.union([
+        z.string().transform(val => val === '' ? undefined : Number(val)),
+        z.number()
+    ]).optional(),
 
-    totalAmount: z
-        .string()
-        .transform(value => (value === "" ? 0 : Number(value)))  // Converts to number or 0 if empty
-        .refine(value => value >= 0, { message: "Total amount cannot be negative." })
-        .optional(),
+    totalAmount: z.union([
+        z.string().transform(val => val === '' ? undefined : Number(val)),
+        z.number()
+    ]).optional(),
+    orderAddress: z.string().optional(),
+    orderState: z.string().optional(),
+    orderZipCode: z.string().optional(),
     trackingId: z.string().optional(),
     trackingCompany: z.string().optional(),
     paymentStatus: z.enum(["pending", "paid"]).optional(),
@@ -81,17 +81,17 @@ function UserSuggestions({ users, onClose, onSelect }: { users: any, onClose: an
                 {users.map((user: any, index: any) => (
                     <div
                         key={index}
-                        className="p-2 hover:bg-gray-100 rounded-md"
-                    // onClick={() => onSelect(user)}
+                        className="p-2 hover:bg-gray-100 rounded-md cursor-pointer border-b border-slate-400"
+                        onClick={() => onSelect(user)}
                     >
-                        <div className="text-sm font-medium">{user.fullName}</div>
-                        <div className="text-xs text-gray-500">{user.address}</div>
-                        <div className="text-xs text-gray-500">{user.mobileNumber}</div>
-                        <div className="flex w-full items-center justify-around mt-2 border-t border-[#9e9d9d]">
-                            <div>
+                        <div className=" font-medium">{user.fullName}</div>
+                        <div className="text-sm text-gray-500">{user.address}</div>
+                        <div className="text-sm text-gray-500">{user.mobileNumber}</div>
+                        <div className="flex w-full items-center justify-around mt-2 border-[#9e9d9d]">
+                            {/* <div>
                                 <AddOrder user={user.id} />
-                            </div>
-                            <div>
+                            </div> */}
+                            <div className="border border-slate-500 rounded-xl overflow-hidden" >
                                 <UserOrdersModal userId={user.id} userName={user.fullName} />
                             </div>
                         </div>
@@ -113,6 +113,7 @@ export function AddCustomerDetailForm() {
     useEffect(() => {
         async function fetchByName() {
             if (debouncedSearch) {
+                console.log("this->", debouncedSearch)
                 const response = await axios.get(`/api/users/searchByName?name=${encodeURIComponent(debouncedSearch)}`);
                 const users = response.data;
                 console.log(users);
@@ -127,6 +128,8 @@ export function AddCustomerDetailForm() {
         fetchByName()
     }, [debouncedSearch]);
 
+
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -137,9 +140,12 @@ export function AddCustomerDetailForm() {
             mobileNumber: "",
             alternateMobileNumber: "",
             orderDetails: "",
-            numOfPieces: 0,
-            numOfParcels: 0,
-            totalAmount: 0,
+            numOfPieces: undefined,
+            numOfParcels: undefined,
+            totalAmount: undefined,
+            orderAddress: "",
+            orderState: undefined,
+            orderZipCode: "",
             trackingId: "",
             trackingCompany: "",
             paymentStatus: undefined,
@@ -149,7 +155,10 @@ export function AddCustomerDetailForm() {
     const handleUserSelect = (user: any) => {
         form.setValue('fullName', user.fullName);
         form.setValue('address', user.address);
+        form.setValue('state', user.state);
+        form.setValue('zipCode', user.zipCode)
         form.setValue('mobileNumber', user.mobileNumber);
+        form.setValue('alternateMobileNumber', user.alternateMobileNumber);
         setShowSuggestions(false);
     };
 
@@ -171,8 +180,30 @@ export function AddCustomerDetailForm() {
                 throw new Error(data.error || "Something went wrong")
             }
 
+            form.reset({
+                fullName: "",
+                address: "",
+                state: undefined,  // explicitly set to undefined
+                zipCode: "",
+                mobileNumber: "",
+                alternateMobileNumber: "",
+                orderDetails: "",
+                numOfPieces: undefined,
+                numOfParcels: undefined,
+                totalAmount: undefined,
+                orderAddress: "",
+                orderState: undefined,
+                orderZipCode: "",
+                trackingId: "",
+                trackingCompany: "",
+                paymentStatus: undefined,  // explicitly set to undefined
+            }, {
+                keepDefaultValues: false  // This forces a complete reset
+            })
+
             alert("Customer and order details saved successfully!")
-            form.reset()
+
+
         } catch (error) {
             console.error("Error:", error)
             if (error instanceof Error) {
@@ -250,7 +281,11 @@ export function AddCustomerDetailForm() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <RequiredFormLabel>State</RequiredFormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value || ""}
+                                                defaultValue=""
+                                            >
                                                 <FormControl>
                                                     <SelectTrigger className="border-primary/20">
                                                         <SelectValue placeholder="Select a state" />
@@ -345,7 +380,16 @@ export function AddCustomerDetailForm() {
                                         <FormItem>
                                             <FormLabel>Number of Pieces</FormLabel>
                                             <FormControl>
-                                                <Input type="number" {...field} className="border-primary/20" />
+                                                <Input
+                                                    type="number"
+                                                    {...field}
+                                                    value={field.value ?? ''} // Show empty string when undefined
+                                                    onChange={e => {
+                                                        const value = e.target.value;
+                                                        field.onChange(value === '' ? undefined : Number(value));
+                                                    }}
+                                                    className="border-primary/20"
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -359,13 +403,21 @@ export function AddCustomerDetailForm() {
                                         <FormItem>
                                             <FormLabel>Number of Parcels</FormLabel>
                                             <FormControl>
-                                                <Input type="number" {...field} className="border-primary/20" />
+                                                <Input
+                                                    type="number"
+                                                    {...field}
+                                                    value={field.value ?? ''} // Show empty string when undefined
+                                                    onChange={e => {
+                                                        const value = e.target.value;
+                                                        field.onChange(value === '' ? undefined : Number(value));
+                                                    }}
+                                                    className="border-primary/20"
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-
                                 <FormField
                                     control={form.control}
                                     name="totalAmount"
@@ -373,7 +425,80 @@ export function AddCustomerDetailForm() {
                                         <FormItem>
                                             <FormLabel>Total Amount</FormLabel>
                                             <FormControl>
-                                                <Input type="number" {...field} className="border-primary/20" />
+                                                <Input
+                                                    type="number"
+                                                    {...field}
+                                                    value={field.value ?? ''} // Show empty string when undefined
+                                                    onChange={e => {
+                                                        const value = e.target.value;
+                                                        field.onChange(value === '' ? undefined : Number(value));
+                                                    }}
+                                                    className="border-primary/20"
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <FormField
+                                control={form.control}
+                                name="orderAddress"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Order Address</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Leave empty if same as user address"
+                                                {...field}
+                                                value={field.value}
+                                                className="border-primary/20"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="orderState"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Order State(Leave empty if same)</FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value || ""}
+                                                defaultValue=""
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger className="border-primary/20">
+                                                        <SelectValue placeholder="Select a state" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {indianRegions.map((state) => (
+                                                        <SelectItem key={state} value={state}>
+                                                            {state}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="orderZipCode"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Order Zip Code</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Leave empty if same" {...field} className="border-primary/20" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -419,8 +544,11 @@ export function AddCustomerDetailForm() {
                                         <FormLabel>Payment Status</FormLabel>
                                         <FormControl>
                                             <RadioGroup
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
+                                                onValueChange={(value) => {
+                                                    field.onChange(value);
+                                                }}
+                                                value={field.value || ""}
+                                                defaultValue=""
                                                 className="flex space-x-4"
                                             >
                                                 <FormItem className="flex items-center space-x-2">

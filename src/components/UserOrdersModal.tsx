@@ -15,6 +15,7 @@ import { toast } from "@/hooks/use-toast"
 import axios from 'axios';
 import { format } from "date-fns";
 import { toZonedTime } from 'date-fns-tz';
+import { indianRegions } from '@/utils/IndianStates';
 
 interface Order {
     id: string;
@@ -22,6 +23,9 @@ interface Order {
     numOfPieces: number;
     numOfParcels: number;
     totalAmount: number;
+    orderAddress: string;
+    orderState: string;
+    orderZipCode: string;
     trackingId: string;
     trackingCompany: string;
     paymentStatus: 'pending' | 'paid';
@@ -156,6 +160,23 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
+                                                <Label>Order Address</Label>
+                                                <Input
+                                                    value={editedOrder?.orderAddress ?? order.orderAddress}
+                                                    onChange={(e) => handleEdit(order.id, 'orderAddress', parseInt(e.target.value))}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Order ZipCode</Label>
+                                                <Input
+                                                    type="number"
+                                                    value={editedOrder?.orderZipCode ?? order.orderZipCode}
+                                                    onChange={(e) => handleEdit(order.id, 'orderZipCode', parseInt(e.target.value))}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
                                                 <Label>Tracking ID</Label>
                                                 <Input
                                                     value={editedOrder?.trackingId ?? order.trackingId}
@@ -170,20 +191,40 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                 />
                                             </div>
                                         </div>
-                                        <div>
-                                            <Label>Payment Status</Label>
-                                            <Select
-                                                value={editedOrder?.paymentStatus ?? order.paymentStatus}
-                                                onValueChange={(value) => handleEdit(order.id, 'paymentStatus', value)}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="pending">Pending</SelectItem>
-                                                    <SelectItem value="paid">Paid</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label>Order State</Label>
+                                                <Select
+                                                    value={editedOrder?.orderState ?? order.orderState}
+                                                    onValueChange={(value) => handleEdit(order.id, 'orderState', value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {indianRegions.map((state) => (
+                                                            <SelectItem key={state} value={state}>
+                                                                {state}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label>Payment Status</Label>
+                                                <Select
+                                                    value={editedOrder?.paymentStatus ?? order.paymentStatus}
+                                                    onValueChange={(value) => handleEdit(order.id, 'paymentStatus', value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="pending">Pending</SelectItem>
+                                                        <SelectItem value="paid">Paid</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
                                     </div>
                                 </CardContent>
