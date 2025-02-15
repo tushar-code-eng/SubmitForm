@@ -5,7 +5,6 @@ export async function PUT(request: Request) {
     try {
         const sendingOrderIdsOnly = await request.json(); // Assuming the request body is an array of IDs
 
-        // Check if the payload is valid
         if (!Array.isArray(sendingOrderIdsOnly) || sendingOrderIdsOnly.length === 0) {
             return NextResponse.json(
                 { error: 'Invalid input: expected an array of IDs.' },
@@ -14,14 +13,14 @@ export async function PUT(request: Request) {
         }
 
         // Update the isPrinted value for all users with the specified IDs
-        const updatedUsers = await prisma.user.updateMany({
+        const updatedUsers = await prisma.order.updateMany({
             where: {
                 id: {
-                    in: sendingOrderIdsOnly, // Filter users by the provided IDs
+                    in: sendingOrderIdsOnly,
                 },
             },
             data: {
-                isPrinted: true, // Set isPrinted to true
+                isPrinted: true,
             },
         });
 
