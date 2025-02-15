@@ -60,7 +60,9 @@ export async function POST(request: Request) {
                 numOfPieces: body.numOfPieces,
                 numOfParcels: body.numOfParcels,
                 totalAmount: body.totalAmount,
-                orderAddress:body.orderAddress, ////////////////////////
+                orderAddress:body.orderAddress,
+                orderState: body.orderState,
+                orderZipCode: body.orderZipCode,
                 trackingId: body.trackingId,
                 trackingCompany: body.trackingCompany,
                 paymentStatus: body.paymentStatus,

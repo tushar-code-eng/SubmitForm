@@ -131,6 +131,14 @@ export default function UserManagement() {
             })
             return
         }
+        const sendingOrderIdsOnly = users.map((user: any) => user.orders[0].id ?? null)
+
+        const updateBool = async () => {
+            const res = await axios.put(`/api/updatePrintBool`, sendingOrderIdsOnly);
+            console.log("ranran", res)
+        }
+        updateBool()
+
         const printWindow = window.open("", "_blank")
         if (printWindow) {
             printWindow.document.write(`
@@ -249,24 +257,24 @@ export default function UserManagement() {
         }
     }
 
-    const handleAddAdditionalUserToDb = async () => {
-        try {
-            const response = await axios.post('/api/additionalUser', {
-                users: additionalUserArray.map((user) => ({ mobileNumber: user.mobileNumber })),
-            });
+    // const handleAddAdditionalUserToDb = async () => {
+    //     try {
+    //         const response = await axios.post('/api/additionalUser', {
+    //             users: additionalUserArray.map((user) => ({ mobileNumber: user.mobileNumber })),
+    //         });
 
-            console.log('Users updated:', response.data);
-            setIsRequestCompleted(!isRequestCompleted);
-        } catch (error: any) {
-            if (error.response) {
-                console.error('Error response:', error.response.data.message);
-            } else if (error.request) {
-                console.error('Error request:', error.request);
-            } else {
-                console.error('Error message:', error.message);
-            }
-        }
-    };
+    //         console.log('Users updated:', response.data);
+    //         setIsRequestCompleted(!isRequestCompleted);
+    //     } catch (error: any) {
+    //         if (error.response) {
+    //             console.error('Error response:', error.response.data.message);
+    //         } else if (error.request) {
+    //             console.error('Error request:', error.request);
+    //         } else {
+    //             console.error('Error message:', error.message);
+    //         }
+    //     }
+    // };
 
     const handleEditingTrackingIds = async () => {
         setEditingTrackingIds(!editingTrackingIds)
@@ -388,7 +396,7 @@ export default function UserManagement() {
                                 {
                                     editingTrackingIds ?
                                         (trackingIdFilter.map((user: any, index) => (
-                                            <TableRow key={user.id}>
+                                            <TableRow key={user.id} className={`${(user.orders && user.orders.length > 0 && user.orders[0].isPrinted) ? 'bg-green-300' : 'bg-transparent'}`}>
                                                 <TableCell>
                                                     <Checkbox
                                                         checked={selectedUsers.some((selectedUser) => selectedUser.id === user.id)}
@@ -418,7 +426,7 @@ export default function UserManagement() {
                                         )))
                                         : (
                                             filteredUsers.map((user: any, index) => (
-                                                <TableRow key={user.id}>
+                                                <TableRow key={user.id} className={`${(user.orders && user.orders.length > 0 && user.orders[0].isPrinted) ? 'bg-green-300' : 'bg-transparent'}`}>
                                                     <TableCell>
                                                         <Checkbox
                                                             checked={selectedUsers.some((selectedUser) => selectedUser.id === user.id)}
