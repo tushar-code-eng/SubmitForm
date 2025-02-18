@@ -1,147 +1,131 @@
 "use client"
 
+import type React from "react"
 import { useEffect, useState } from "react"
-import { type User } from "@/utils/mockData"
+import type { User } from "@/utils/mockData"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
-import logo from "../../../public/imgaaka.png"
-import UserSearchModal from "@/components/UserSearchModal"
-
-import axios from 'axios'
-import AddOrder from "@/components/AddOrder"
+import { Calendar, Search, Trash2, Printer, Edit, UserIcon } from "lucide-react"
+import axios from "axios"
 import UserOrdersModal from "@/components/UserOrdersModal"
+import { cn } from "@/lib/utils"
 
 export default function UserManagement() {
-    const [selectedDate, setSelectedDate] = useState<string>("")
-    const [selectedUsers, setSelectedUsers] = useState<User[]>([])
-    const [users, setUsers] = useState<User[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [selectedDate, setSelectedDate] = useState<string>("")
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
+  const [trackingIdUsers, setTrackingIdUsers] = useState<User[]>([])
+  const [trackingIdFilter, setTrackingIdFilter] = useState<User[]>([])
+  const [additionalUserArray, setAdditionalUserArray] = useState<any[]>([])
+  const [isRequestCompleted, setIsRequestCompleted] = useState<boolean>(false)
+  const [editingTrackingIds, setEditingTrackingIds] = useState(false)
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(`/api/users?date=${selectedDate}`)
+        if (!response.ok) throw new Error("Failed to fetch users")
+        const data: User[] = await response.json()
+        const sortedUsers = [...data].sort((a, b) => a.fullName.localeCompare(b.fullName))
+        setUsers(sortedUsers)
+        setFilteredUsers(sortedUsers)
+      } catch (err) {
+        console.log("Error fetching users. Please try again later.", err)
+      }
+    }
+    fetchUsers()
+  }, [selectedDate])
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedDate(e.target.value)
+    setEditingTrackingIds(false)
+  }
 
-    const [trackingIdUsers, setTrackingIdUsers] = useState<User[]>([])
-    const [trackingIdFilter, setTrackingIdFilter] = useState<User[]>([])
+  const handleUserSelection = (user: User) => {
+    setSelectedUsers((prev) =>
+      prev.some((selectedUser) => selectedUser.id === user.id)
+        ? prev.filter((selectedUser) => selectedUser.id !== user.id)
+        : [...prev, user],
+    )
+  }
 
-    const [additionalUserArray, setAdditionalUserArray] = useState<any[]>([]);
-    const [isRequestCompleted, setIsRequestCompleted] = useState<boolean>(false);
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedUsers(checked ? (editingTrackingIds ? trackingIdFilter : filteredUsers) : [])
+  }
 
-    const [editingTrackingIds, setEditingTrackingIds] = useState(false)
-
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await fetch(`/api/users?date=${selectedDate}`)
-                if (!response.ok) throw new Error("Failed to fetch users")
-
-                const data: User[] = await response.json()
-                console.log(data)
-
-                // Sort the users alphabetically by fullName
-                const sortedUsers = [...data].sort((a, b) =>
-                    a.fullName.localeCompare(b.fullName)
-                )
-
-                setUsers(sortedUsers)
-                setFilteredUsers(sortedUsers)
-            } catch (err) {
-                console.log("Error fetching users. Please try again later.", err)
-            }
-        }
-        fetchUsers()
-    }, [selectedDate, isRequestCompleted])
-
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedDate(e.target.value)
-        setEditingTrackingIds(false)
+  const handleDeleteSelectedUsers = async () => {
+    if (!selectedDate) {
+      toast({
+        title: "No Date Selected",
+        description: "Please select a date to delete print records.",
+        variant: "destructive",
+      })
+      return
     }
 
-    const handleUserSelection = (user: User) => {
-        setSelectedUsers((prev) =>
-            prev.some((selectedUser) => selectedUser.id === user.id)
-                ? prev.filter((selectedUser) => selectedUser.id !== user.id)
-                : [...prev, user],
-        )
+    if (selectedUsers.length === 0) {
+      toast({
+        title: "No Users Selected",
+        description: "Please select users to delete print records.",
+        variant: "destructive",
+      })
+      return
     }
 
-    const handleSelectAll = (checked: boolean) => {
-        setSelectedUsers(checked ? [...users] : [])
+    try {
+      setIsLoading(true)
+      const response = await axios.delete("/api/deletePrint", {
+        data: {
+          userIds: selectedUsers.map((user) => user.id),
+          printDate: selectedDate,
+        },
+      })
+
+      console.log(response)
+
+      toast({
+        title: "Success",
+        description: "Print records deleted successfully.",
+      })
+
+      setSelectedUsers([])
+      setIsRequestCompleted((prev) => !prev)
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to delete print records.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-
-    const handleDeleteSelectedUsers = async () => {
-        if (!selectedDate) {
-            toast({
-                title: "No Date Selected",
-                description: "Please select a date to delete print records.",
-                variant: "destructive"
-            })
-            return
-        }
-
-        if (selectedUsers.length === 0) {
-            toast({
-                title: "No Users Selected",
-                description: "Please select users to delete print records.",
-                variant: "destructive"
-            })
-            return
-        }
-
-        try {
-            setIsLoading(true)
-            const response = await axios.delete('/api/deletePrint', {
-                data: {
-                    userIds: selectedUsers.map(user => user.id),
-                    printDate: selectedDate
-                }
-            })
-
-            console.log(response)
-
-            toast({
-                title: "Success",
-                description: "Print records deleted successfully.",
-            })
-
-            setSelectedUsers([])
-            setIsRequestCompleted(prev => !prev)
-        } catch (error: any) {
-            toast({
-                title: "Error",
-                description: error.response?.data?.message || "Failed to delete print records.",
-                variant: "destructive"
-            })
-        } finally {
-            setIsLoading(false)
-        }
+  const handlePrintSelectedUsers = () => {
+    if (selectedUsers.length === 0) {
+      toast({
+        title: "No Users Selected",
+        description: "Please select users to print.",
+      })
+      return
     }
+    const sendingOrderIdsOnly = users.map((user: any) => user.orders[0].id ?? null)
 
+    const updateBool = async () => {
+      const res = await axios.put(`/api/updatePrintBool`, sendingOrderIdsOnly)
+      console.log("ranran", res)
+    }
+    updateBool()
 
-    const handlePrintSelectedUsers = () => {
-        if (selectedUsers.length === 0) {
-            toast({
-                title: "No Users Selected",
-                description: "Please select users to print.",
-            })
-            return
-        }
-        const sendingOrderIdsOnly = users.map((user: any) => user.orders[0].id ?? null)
-
-        const updateBool = async () => {
-            const res = await axios.put(`/api/updatePrintBool`, sendingOrderIdsOnly);
-            console.log("ranran", res)
-        }
-        updateBool()
-
-        const printWindow = window.open("", "_blank")
-        if (printWindow) {
-            printWindow.document.write(`
+    const printWindow = window.open("", "_blank")
+    if (printWindow) {
+      printWindow.document.write(`
             <html>
             <head>
               <style>
@@ -154,7 +138,6 @@ export default function UserManagement() {
                 body {
                   font-family: Arial, sans-serif;
                   margin: 0;
-                //   padding: 15px;
                   box-sizing: border-box;
                 }
                 .page {
@@ -208,26 +191,33 @@ export default function UserManagement() {
             <body>
           `)
 
-            const pages = []
-            const pageSize = 3;
+      const pages = []
+      const pageSize = 3
 
-            for (let i = 0; i < selectedUsers.length; i += pageSize) {
-                pages.push(selectedUsers.slice(i, i + pageSize));
-            }
+      for (let i = 0; i < selectedUsers.length; i += pageSize) {
+        pages.push(selectedUsers.slice(i, i + pageSize))
+      }
 
-            pages.forEach((pageUsers, pageIndex) => {
-                const isLastPage = pageIndex === pages.length - 1;
-                printWindow.document.write(`<div class="page" style="${!isLastPage ? 'page-break-after: always;' : ''}">`);
+      pages.forEach((pageUsers, pageIndex) => {
+        const isLastPage = pageIndex === pages.length - 1
+        printWindow.document.write(`<div class="page" style="${!isLastPage ? "page-break-after: always;" : ""}">`)
 
-                pageUsers.forEach((user: any) => {
-                    const addressParts = (user.orders && user.orders.length > 0 && user.orders[0].orderAddress) ? user.orders[0].orderAddress.split(",") : user.address.split(",");
-                    const mainAddress = addressParts.slice(0, -1).join(",");
-                    const cityState = addressParts[addressParts.length - 1];
+        pageUsers.forEach((user: any) => {
+          const addressParts =
+            user.orders && user.orders.length > 0 && user.orders[0].orderAddress
+              ? user.orders[0].orderAddress.split(",")
+              : user.address.split(",")
+          const mainAddress = addressParts.slice(0, -1).join(",")
+          const cityState = addressParts[addressParts.length - 1]
 
-                    const userState = (user.orders && user.orders.length > 0 && user.orders[0].orderState) ? user.orders[0].orderState : user.state
-                    const userZip = (user.orders && user.orders.length > 0 && user.orders[0].orderZipCode) ? user.orders[0].orderZipCode : user.zipCode
+          const userState =
+            user.orders && user.orders.length > 0 && user.orders[0].orderState ? user.orders[0].orderState : user.state
+          const userZip =
+            user.orders && user.orders.length > 0 && user.orders[0].orderZipCode
+              ? user.orders[0].orderZipCode
+              : user.zipCode
 
-                    printWindow.document.write(`
+          printWindow.document.write(`
                     <div class="shipping-label">
                         <div class="header">
                             <img src="https://s3-inventorymanagementwow.s3.ap-south-1.amazonaws.com/imgaaka.png" alt="AAKA Logo" class="logo">
@@ -245,228 +235,202 @@ export default function UserManagement() {
                             7009928110
                         </div>
                     </div>
-                    `);
-                });
+                    `)
+        })
 
-                printWindow.document.write("</div>");
-            });
+        printWindow.document.write("</div>")
+      })
 
-            printWindow.document.write("</body></html>");
-            printWindow.document.close();
-            printWindow.print();
-        }
+      printWindow.document.write("</body></html>")
+      printWindow.document.close()
+      printWindow.print()
     }
+  }
 
-    // const handleAddAdditionalUserToDb = async () => {
-    //     try {
-    //         const response = await axios.post('/api/additionalUser', {
-    //             users: additionalUserArray.map((user) => ({ mobileNumber: user.mobileNumber })),
-    //         });
+  const handleEditingTrackingIds = async () => {
+    setEditingTrackingIds(!editingTrackingIds)
+    const response = await axios.get(`/api/orders?date=${selectedDate}`)
+    const orderData = response.data
+    const filteredData = await orderData.filter((item: any) => !item.trackingId || !item.trackingCompany)
+    const uniqueUsers = new Map()
 
-    //         console.log('Users updated:', response.data);
-    //         setIsRequestCompleted(!isRequestCompleted);
-    //     } catch (error: any) {
-    //         if (error.response) {
-    //             console.error('Error response:', error.response.data.message);
-    //         } else if (error.request) {
-    //             console.error('Error request:', error.request);
-    //         } else {
-    //             console.error('Error message:', error.message);
-    //         }
-    //     }
-    // };
+    filteredData.forEach((order: any) => {
+      if (!uniqueUsers.has(order.user.id)) {
+        uniqueUsers.set(order.user.id, order.user)
+      }
+    })
 
-    const handleEditingTrackingIds = async () => {
-        setEditingTrackingIds(!editingTrackingIds)
-        const response = await axios.get(`/api/orders?date=${selectedDate}`)
-        const orderData = response.data
-        const filteredData = await orderData.filter((item: any) =>
-            !item.trackingId || !item.trackingCompany
-        );
-        const uniqueUsers = new Map();
+    const users = Array.from(uniqueUsers.values())
+    const sortedUsers = [...users].sort((a, b) => a.fullName.localeCompare(b.fullName))
+    setTrackingIdUsers(sortedUsers)
+  }
 
-        filteredData.forEach((order: any) => {
-            if (!uniqueUsers.has(order.user.id)) {
-                uniqueUsers.set(order.user.id, order.user);
-            }
-        });
+  const handleCardClick = (user: User) => {
+    handleUserSelection(user)
+  }
 
-        const users = Array.from(uniqueUsers.values());
-        // Sort tracking ID users alphabetically
-        const sortedUsers = [...users].sort((a, b) =>
-            a.fullName.localeCompare(b.fullName)
-        );
-        setTrackingIdUsers(sortedUsers);
+  useEffect(() => {
+    if (editingTrackingIds) {
+      const filtered = trackingIdUsers
+        .filter((user: any) => {
+          const searchLower = searchTerm.toLowerCase()
+          return (
+            user.fullName.toLowerCase().includes(searchLower) ||
+            user.mobileNumber.includes(searchLower) ||
+            user.address.toLowerCase().includes(searchLower) ||
+            user.state.toLowerCase().includes(searchLower) ||
+            (user.registrationDate && user.registrationDate.includes(searchTerm))
+          )
+        })
+        .sort((a, b) => a.fullName.localeCompare(b.fullName))
+      setTrackingIdFilter(filtered)
+    } else {
+      const filtered = users.filter((user: any) => {
+        const searchLower = searchTerm.toLowerCase()
+        return (
+          user.fullName.toLowerCase().includes(searchLower) ||
+          user.mobileNumber.includes(searchLower) ||
+          user.address.toLowerCase().includes(searchLower) ||
+          user.state.toLowerCase().includes(searchLower) ||
+          (user.registrationDate && user.registrationDate.includes(searchTerm))
+        )
+      })
+      setFilteredUsers(filtered)
     }
+  }, [searchTerm, users, trackingIdUsers, editingTrackingIds])
 
-    useEffect(() => {
-        if (editingTrackingIds) {
-            const filtered = trackingIdUsers
-                .filter((user: any) => {
-                    const searchLower = searchTerm.toLowerCase();
-                    return (
-                        user.fullName.toLowerCase().includes(searchLower) ||
-                        user.mobileNumber.includes(searchLower) ||
-                        user.address.toLowerCase().includes(searchLower) ||
-                        user.state.toLowerCase().includes(searchLower) ||
-                        (user.registrationDate && user.registrationDate.includes(searchTerm))
-                    );
-                })
-                .sort((a, b) => a.fullName.localeCompare(b.fullName));
-            setTrackingIdFilter(filtered);
-        } else {
-            const filtered = users.filter((user: any) => {
-                const searchLower = searchTerm.toLowerCase();
-                return (
-                    user.fullName.toLowerCase().includes(searchLower) ||
-                    user.mobileNumber.includes(searchLower) ||
-                    user.address.toLowerCase().includes(searchLower) ||
-                    user.state.toLowerCase().includes(searchLower) ||
-                    (user.registrationDate && user.registrationDate.includes(searchTerm))
-                );
-            });
-            // No need to sort filtered users as they inherit the sort from users
-            setFilteredUsers(filtered);
-        }
-    }, [searchTerm, users, trackingIdUsers]);
-
-    return (
-        <div className="container mx-auto py-10 bg-secondary min-h-screen">
-            <h1 className="text-3xl font-bold text-center mb-6 text-primary">AAKA User Management</h1>
-            <Card className="w-full bg-white shadow-lg">
-                <CardHeader className="bg-primary text-primary-foreground">
-                    <CardTitle>Customer Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="mb-4">
-                        <label htmlFor="dateFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                            Filter by Registration Date:
-                        </label>
-                        <Input
-                            type="date"
-                            id="dateFilter"
-                            value={selectedDate}
-                            onChange={handleDateChange}
-                            className="border-primary/20"
-                        />
-                    </div>
-                    <div className="flex items-center justify-center gap-3" >
-                        {/* <UserSearchModal handleAddAdditionalUser={handleAddAdditionalUserToDb} additionalUser={additionalUserArray} setAdditionalUserArray={setAdditionalUserArray} /> */}
-                        <Button
-                            onClick={handleDeleteSelectedUsers}
-                            disabled={selectedUsers.length === 0 || !selectedDate || isLoading}
-                            variant="destructive"
-                        >
-                            Delete Print Records
-                        </Button>
-                        <Input
-                            placeholder="Search by name, address, state or date..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className=""
-                        />
-                        <div className={`text-center text-sm font-semibold px-2 py-1 rounded-lg cursor-pointer ${editingTrackingIds ? "bg-red-500 text-white" : " text-black"}`} onClick={handleEditingTrackingIds}>
-                            Edit TrackingIds
-                        </div>
-                    </div>
-                    <div className="mb-4">
-                        <p className="text-sm font-medium text-gray-700">Selected Users: {selectedUsers.length}</p>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[50px]">
-                                        <Checkbox
-                                            checked={users.length > 0 && selectedUsers.length === users.length}
-                                            onCheckedChange={handleSelectAll}
-                                        />
-                                    </TableHead>
-                                    <TableHead className="w-[50px]">S.No</TableHead>
-                                    <TableHead>Full Name</TableHead>
-                                    <TableHead>Address</TableHead>
-                                    <TableHead>State</TableHead>
-                                    <TableHead>Zip Code</TableHead>
-                                    <TableHead>Mobile Number</TableHead>
-                                    <TableHead>Alternate Mobile</TableHead>
-                                    <TableHead>Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {
-                                    editingTrackingIds ?
-                                        (trackingIdFilter.map((user: any, index) => (
-                                            <TableRow key={user.id} className={`${(user.orders && user.orders.length > 0 && user.orders[0].isPrinted) ? 'bg-green-300' : 'bg-transparent'}`}>
-                                                <TableCell>
-                                                    <Checkbox
-                                                        checked={selectedUsers.some((selectedUser) => selectedUser.id === user.id)}
-                                                        onCheckedChange={() => handleUserSelection(user)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>{index + 1}</TableCell>
-                                                <TableCell>{user.fullName}</TableCell>
-                                                <TableCell >
-                                                    {
-                                                        (user.orders && user.orders.length > 0 && user.orders[0].orderAddress) ?
-                                                            user.orders[0].orderAddress :
-                                                            user.address
-                                                    }
-                                                </TableCell>
-                                                <TableCell>{(user.orders && user.orders.length > 0 && user.orders[0].orderState) ? user.orders[0].orderState : user.state}</TableCell>
-                                                <TableCell>{(user.orders && user.orders.length > 0 && user.orders[0].orderZipCode) ? user.orders[0].orderZipCode : user.zipCode}</TableCell>
-                                                <TableCell>{user.mobileNumber}</TableCell>
-                                                <TableCell>{user.alternateMobileNumber || "-"}</TableCell>
-                                                <TableCell>
-                                                    <div className="flex gap-2">
-                                                        {/* <AddOrder user={user.id} /> */}
-                                                        <UserOrdersModal userId={user.id} userName={user.fullName} />
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        )))
-                                        : (
-                                            filteredUsers.map((user: any, index) => (
-                                                <TableRow key={user.id} className={`${(user.orders && user.orders.length > 0 && user.orders[0].isPrinted) ? 'bg-green-300' : 'bg-transparent'}`}>
-                                                    <TableCell>
-                                                        <Checkbox
-                                                            checked={selectedUsers.some((selectedUser) => selectedUser.id === user.id)}
-                                                            onCheckedChange={() => handleUserSelection(user)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>{index + 1}</TableCell>
-                                                    <TableCell>{user.fullName}</TableCell>
-                                                    <TableCell >
-                                                        {
-                                                            (user.orders && user.orders.length > 0 && user.orders[0].orderAddress) ?
-                                                                user.orders[0].orderAddress :
-                                                                user.address
-                                                        }
-                                                    </TableCell>
-                                                    <TableCell>{(user.orders && user.orders.length > 0 && user.orders[0].orderState) ? user.orders[0].orderState : user.state}</TableCell>
-                                                    <TableCell>{(user.orders && user.orders.length > 0 && user.orders[0].orderZipCode) ? user.orders[0].orderZipCode : user.zipCode}</TableCell>
-                                                    <TableCell>{user.mobileNumber}</TableCell>
-                                                    <TableCell>{user.alternateMobileNumber || "-"}</TableCell>
-                                                    <TableCell>
-                                                        <div className="flex gap-2">
-                                                            {/* <AddOrder user={user.id} /> */}
-                                                            <UserOrdersModal userId={user.id} userName={user.fullName} />
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
-                                        )
-                                }
-                            </TableBody>
-                        </Table>
-                    </div>
-                    <div className="mt-4">
-                        <Button onClick={handlePrintSelectedUsers} disabled={selectedUsers.length === 0} className="w-full">
-                            Print
-                        </Button>
-                    </div>
+  return (
+    <div className="py-1">
+      <Card className="w-full bg-white shadow-none border-none">
+        <CardHeader>
+          <CardTitle className="text-4xl font-bold">Customer Details</CardTitle>
+        </CardHeader>
+        <CardContent className="px-6">
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex-1 min-w-[200px]">
+              <label htmlFor="dateFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                Filter by Registration Date:
+              </label>
+              <div className="relative">
+                <Input
+                  type="date"
+                  id="dateFilter"
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                  className="pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+                />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              </div>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+                Search:
+              </label>
+              <div className="relative">
+                <Input
+                  id="search"
+                  placeholder="Search by name, address, state or date..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <Button
+              onClick={handleDeleteSelectedUsers}
+              disabled={selectedUsers.length === 0 || !selectedDate || isLoading}
+              variant="destructive"
+              className="flex items-center gap-2"
+            >
+              <Trash2 size={18} />
+              Delete Print Records
+            </Button>
+            <Button
+              onClick={handleEditingTrackingIds}
+              variant={editingTrackingIds ? "destructive" : "secondary"}
+              className="flex items-center gap-2"
+            >
+              <Edit size={18} />
+              {editingTrackingIds ? "Cancel Editing" : "Edit Tracking IDs"}
+            </Button>
+            <Button
+              onClick={() => handleSelectAll(!selectedUsers.length)}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Checkbox
+                checked={selectedUsers.length === (editingTrackingIds ? trackingIdFilter : filteredUsers).length}
+                onCheckedChange={(checked) => handleSelectAll(!!checked)}
+              />
+              Select All
+            </Button>
+            <p className="text-sm font-medium text-gray-700">
+              Selected Users: <span className="font-bold">{selectedUsers.length}</span>
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(editingTrackingIds ? trackingIdFilter : filteredUsers).map((user: any, index) => (
+              <Card
+                key={user.id}
+                className={cn(
+                  user.orders && user.orders.length > 0 && user.orders[0].isPrinted ? "bg-green-100" : "bg-white",
+                  "hover:bg-gray-50 cursor-pointer transition-colors",
+                  selectedUsers.some((selectedUser) => selectedUser.id === user.id) && "ring-2 ring-blue-500",
+                )}
+                onClick={() => handleCardClick(user)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Checkbox
+                      checked={selectedUsers.some((selectedUser) => selectedUser.id === user.id)}
+                      onCheckedChange={() => handleUserSelection(user)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span className="text-sm text-gray-500">#{index + 1}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <UserIcon className="w-5 h-5 text-gray-400" />
+                    <h3 className="text-lg font-semibold">{user.fullName}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {user.orders && user.orders.length > 0 && user.orders[0].orderAddress
+                      ? user.orders[0].orderAddress
+                      : user.address}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {user.orders && user.orders.length > 0 && user.orders[0].orderState
+                      ? user.orders[0].orderState
+                      : user.state}
+                    ,{" "}
+                    {user.orders && user.orders.length > 0 && user.orders[0].orderZipCode
+                      ? user.orders[0].orderZipCode
+                      : user.zipCode}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-1">{user.mobileNumber}</p>
+                  <p className="text-sm text-gray-600 mb-2">{user.alternateMobileNumber || "No alternate number"}</p>
+                  <div className="mt-2">
+                    <UserOrdersModal userId={user.id} userName={user.fullName} />
+                  </div>
                 </CardContent>
-            </Card>
-        </div>
-    )
+              </Card>
+            ))}
+          </div>
+          <div className="mt-6">
+            <Button
+              onClick={handlePrintSelectedUsers}
+              disabled={selectedUsers.length === 0}
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Printer size={18} />
+              Print Selected Users
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
 }
 
