@@ -12,6 +12,7 @@ import { Calendar, Search, Trash2, Printer, Edit, UserIcon } from "lucide-react"
 import axios from "axios"
 import UserOrdersModal from "@/components/UserOrdersModal"
 import { cn } from "@/lib/utils"
+import EditUserDetails from "@/components/EditUserDetails"
 
 export default function UserManagement() {
   const [selectedDate, setSelectedDate] = useState<string>("")
@@ -411,8 +412,9 @@ export default function UserManagement() {
                   </p>
                   <p className="text-sm text-gray-600 mb-1">{user.mobileNumber}</p>
                   <p className="text-sm text-gray-600 mb-2">{user.alternateMobileNumber || "No alternate number"}</p>
-                  <div className="mt-2">
+                  <div className="mt-2 flex items-center w-full justify-between">
                     <UserOrdersModal userId={user.id} userName={user.fullName} />
+                    <EditUserDetails userId={user.id} userName={user.fullName} />
                   </div>
                 </CardContent>
               </Card>

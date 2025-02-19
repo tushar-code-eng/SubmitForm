@@ -169,9 +169,8 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                             <div>
                                                 <Label>Order ZipCode</Label>
                                                 <Input
-                                                    type="number"
                                                     value={editedOrder?.orderZipCode ?? order.orderZipCode}
-                                                    onChange={(e) => handleEdit(order.id, 'orderZipCode', parseInt(e.target.value))}
+                                                    onChange={(e) => handleEdit(order.id, 'orderZipCode',e.target.value)}
                                                 />
                                             </div>
                                         </div>
