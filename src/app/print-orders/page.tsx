@@ -221,7 +221,7 @@ export default function UserManagement() {
           printWindow.document.write(`
                     <div class="shipping-label">
                         <div class="header">
-                            <img src="https://s3-inventorymanagementwow.s3.ap-south-1.amazonaws.com/imgaaka.png" alt="AAKA Logo" class="logo">
+                            <img src="https://drive.google.com/file/d/1l9VO7598uBejTimbaWmQ4erE4t2V0o1V/view?usp=sharing" alt="AAKA Logo" class="logo">
                             <div class="company-name">Night Suits By Aaka</div>
                         </div>
                         <div class="shipping-title">Shipping Address:</div>
