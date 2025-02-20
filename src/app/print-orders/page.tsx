@@ -13,6 +13,7 @@ import axios from "axios"
 import UserOrdersModal from "@/components/UserOrdersModal"
 import { cn } from "@/lib/utils"
 import EditUserDetails from "@/components/EditUserDetails"
+// const AAKA_LOGO = "data:image/png;base64,..."
 
 export default function UserManagement() {
   const [selectedDate, setSelectedDate] = useState<string>("")
@@ -126,6 +127,7 @@ export default function UserManagement() {
 
     const printWindow = window.open("", "_blank")
     if (printWindow) {
+      const imageUrl = window.location.origin + '/imgaaka.png'
       printWindow.document.write(`
             <html>
             <head>
@@ -221,7 +223,7 @@ export default function UserManagement() {
           printWindow.document.write(`
                     <div class="shipping-label">
                         <div class="header">
-                            <img src="https://drive.google.com/file/d/1l9VO7598uBejTimbaWmQ4erE4t2V0o1V/view?usp=sharing" alt="AAKA Logo" class="logo">
+                            <img src="${imageUrl}" alt="AAKA Logo" class="logo">
                             <div class="company-name">Night Suits By Aaka</div>
                         </div>
                         <div class="shipping-title">Shipping Address:</div>
