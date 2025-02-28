@@ -21,11 +21,20 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue"
 import UserOrdersModal from "./UserOrdersModal"
 import { motion } from "framer-motion"
 
+import { AlignEndVertical } from "lucide-react"
+
 function RequiredFormLabel({ children }: { children: React.ReactNode }) {
   return (
     <FormLabel className="flex items-center">
       {children}
-      <span className="text-red-500 ml-1">*</span>
+      <span className="text-red-300 ml-1">*</span>
+    </FormLabel>
+  )
+}
+function NormalFormLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <FormLabel className="flex items-center">
+      {children}
     </FormLabel>
   )
 }
@@ -50,7 +59,7 @@ const formSchema = z.object({
   orderZipCode: z.string().optional(),
   trackingId: z.string().optional(),
   trackingCompany: z.string().optional(),
-  paymentStatus: z.enum(["pending", "paid"]).optional(),
+  paymentStatus: z.enum(["pending", "paid"]).default("paid"),
 })
 
 function UserSuggestions({ users, onClose, onSelect }: { users: any; onClose: any; onSelect: any }) {
@@ -134,7 +143,7 @@ export function AddCustomerDetailForm() {
       orderZipCode: "",
       trackingId: "",
       trackingCompany: "",
-      paymentStatus: undefined,
+      paymentStatus: "paid", // Changed from undefined to "paid"
     },
   })
 
@@ -183,7 +192,7 @@ export function AddCustomerDetailForm() {
           orderZipCode: "",
           trackingId: "",
           trackingCompany: "",
-          paymentStatus: undefined,
+          paymentStatus: "paid", // Changed from undefined to "paid"
         },
         {
           keepDefaultValues: false,
@@ -204,130 +213,280 @@ export function AddCustomerDetailForm() {
   }
 
   return (
-    <Card className="w-full max-w-4xl bg-transparent border-none overflow-hidden shadow-none rounded-none">
-      <CardHeader className=" p-6">
-        <CardTitle className="text-4xl font-bold">Customer & Order Details</CardTitle>
-        {/* <CardDescription className="text-blue-100">
-          Please fill out all required fields below. Order details are optional.
-        </CardDescription> */}
+    <Card className=" bg-[#15191A] border border-neutral-800 rounded-xl w-[100%]">
+      <CardHeader className="border-b-[1px] border-neutral-800" >
+        <CardTitle className="text-xl flex w-full items-center justify-between font-light gap-2 text-[#F4F4F6]">
+          <div className="flex items-center gap-2">
+            <AlignEndVertical className="text-green-500" />
+            <p> <span className="text-[#575D60]">Customer/</span>Order</p>
+          </div>
+          <div>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="border bg-transparent text-[#F4F4F6] border-blue-700 text-lg font-light hover:bg-blue-800 py-3 px-6 shadow-sm shadow-blue-600 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              {isSubmitting ? "Submitting..." : "Submit"}
+            </Button>
+          </div>
+        </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent className="py-3">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-6"
-            >
-              <h3 className="text-xl font-semibold flex items-center">
-                <User className="mr-2" /> Customer Details
-              </h3>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="">
+            <div className="flex justify-between gap-4 " >
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-4 w-full p-3"
+              >
+                <h3 className="text-xl font-light flex items-center">
+                  <User className="mr-2 text-[#575D60]" /> <span className=" text-[#F4F4F6]">Customer <span className="text-green-500">Details</span> </span>
+                </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem className="relative">
+                        <RequiredFormLabel>Full Name</RequiredFormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter your name"
+                            value={field.value}
+                            onChange={(e) => {
+                              field.onChange(e)
+                              setNameValue(e.target.value)
+                            }}
+                            className=" bg-[#1D2328] border-none focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                        {showSuggestions && (
+                          <UserSuggestions
+                            users={users}
+                            onClose={() => setShowSuggestions(false)}
+                            onSelect={handleUserSelect}
+                          />
+                        )}
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="mobileNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <RequiredFormLabel>Mobile Number</RequiredFormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter mobile number"
+                            {...field}
+                            className="bg-[#1D2328] border-none focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="fullName"
+                  name="address"
                   render={({ field }) => (
-                    <FormItem className="relative">
-                      <RequiredFormLabel>Full Name</RequiredFormLabel>
+                    <FormItem>
+                      <RequiredFormLabel>Address</RequiredFormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter your address"
+                          {...field}
+                          className="bg-[#1D2328] border-none focus:border-green-500 min-h-[100px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <RequiredFormLabel>State</RequiredFormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || ""} defaultValue="">
+                          <FormControl>
+                            <SelectTrigger className="bg-[#1D2328] border-none focus:border-green-500">
+                              <SelectValue placeholder="Select a state" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-[#1D2328] border-none focus:border-green-500">
+                            {indianRegions.map((state) => (
+                              <SelectItem key={state} value={state}>
+                                {state}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="zipCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <RequiredFormLabel>Zip Code</RequiredFormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter zip code"
+                            {...field}
+                            className="bg-[#1D2328] border-none focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="alternateMobileNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <NormalFormLabel>Alternate Mobile Number</NormalFormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter alternate number"
+                            {...field}
+                            className="bg-[#1D2328] border-none focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="space-y-4 w-full bg-[#1D2328] rounded-lg p-3 border border-neutral-800 shadow-lg"
+              >
+                <h3 className="text-xl font-light flex items-center">
+                  <Package className="mr-2 text-[#575D60]" /> <span className=" text-[#F4F4F6]">Order <span className="text-blue-500">Details</span> </span>
+                </h3>
+
+                <FormField
+                  control={form.control}
+                  name="orderDetails"
+                  render={({ field }) => (
+                    <FormItem>
+                      <RequiredFormLabel>Order Details</RequiredFormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter order details"
+                          className="min-h-[100px] bg-[#15191A] border-none focus:border-green-500"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="numOfPieces"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Number of Pieces</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              field.onChange(value === "" ? undefined : Number(value))
+                            }}
+                            className="bg-[#15191A] border-none focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="numOfParcels"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Number of Parcels</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              field.onChange(value === "" ? undefined : Number(value))
+                            }}
+                            className="bg-[#15191A] border-none focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="totalAmount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Total Amount</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              field.onChange(value === "" ? undefined : Number(value))
+                            }}
+                            className="bg-[#15191A] border-none focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="orderAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Order Address</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter your name"
+                          placeholder="Leave empty if same as user address"
+                          {...field}
                           value={field.value}
-                          onChange={(e) => {
-                            field.onChange(e)
-                            setNameValue(e.target.value)
-                          }}
-                          className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                      {showSuggestions && (
-                        <UserSuggestions
-                          users={users}
-                          onClose={() => setShowSuggestions(false)}
-                          onSelect={handleUserSelect}
-                        />
-                      )}
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="mobileNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <RequiredFormLabel>Mobile Number</RequiredFormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter mobile number"
-                          {...field}
-                          className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <RequiredFormLabel>Address</RequiredFormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter your address"
-                        {...field}
-                        className="border-gray-300 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <FormField
-                  control={form.control}
-                  name="state"
-                  render={({ field }) => (
-                    <FormItem>
-                      <RequiredFormLabel>State</RequiredFormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""} defaultValue="">
-                        <FormControl>
-                          <SelectTrigger className="border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                            <SelectValue placeholder="Select a state" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {indianRegions.map((state) => (
-                            <SelectItem key={state} value={state}>
-                              {state}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="zipCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <RequiredFormLabel>Zip Code</RequiredFormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter zip code"
-                          {...field}
-                          className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                          className="bg-[#15191A] border-none focus:border-green-500"
                         />
                       </FormControl>
                       <FormMessage />
@@ -335,266 +494,125 @@ export function AddCustomerDetailForm() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="alternateMobileNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Alternate Mobile Number</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter alternate number"
-                          {...field}
-                          className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="space-y-6"
-            >
-              <h3 className="text-xl font-semibold flex items-center">
-                <Package className="mr-2" /> Order Details (Optional)
-              </h3>
-
-              <FormField
-                control={form.control}
-                name="orderDetails"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Order Details</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter order details"
-                        className="min-h-[100px] border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <FormField
-                  control={form.control}
-                  name="numOfPieces"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Pieces</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          value={field.value ?? ""}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            field.onChange(value === "" ? undefined : Number(value))
-                          }}
-                          className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="numOfParcels"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Parcels</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          value={field.value ?? ""}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            field.onChange(value === "" ? undefined : Number(value))
-                          }}
-                          className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="totalAmount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Total Amount</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          value={field.value ?? ""}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            field.onChange(value === "" ? undefined : Number(value))
-                          }}
-                          className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="orderAddress"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Order Address</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Leave empty if same as user address"
-                        {...field}
-                        value={field.value}
-                        className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="orderState"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Order State (Leave empty if same)</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""} defaultValue="">
-                        <FormControl>
-                          <SelectTrigger className="border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                            <SelectValue placeholder="Select a state" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {indianRegions.map((state) => (
-                            <SelectItem key={state} value={state}>
-                              {state}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="orderZipCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Order Zip Code</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Leave empty if same"
-                          {...field}
-                          className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="trackingId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tracking ID</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="trackingCompany"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tracking Company</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="paymentStatus"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Payment Status</FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={(value) => {
-                          field.onChange(value)
-                        }}
-                        value={field.value || ""}
-                        defaultValue=""
-                        className="flex space-x-4"
-                      >
-                        <FormItem className="flex items-center space-x-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="orderState"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Order State (Leave empty if same)</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || ""} defaultValue="">
                           <FormControl>
-                            <RadioGroupItem value="pending" />
+                            <SelectTrigger className="bg-[#15191A] border-none focus:border-green-500">
+                              <SelectValue placeholder="Select a state" />
+                            </SelectTrigger>
                           </FormControl>
-                          <FormLabel className="font-normal">Pending</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-2">
-                          <FormControl>
-                            <RadioGroupItem value="paid" />
-                          </FormControl>
-                          <FormLabel className="font-normal">Paid</FormLabel>
-                        </FormItem>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </motion.div>
+                          <SelectContent>
+                            {indianRegions.map((state) => (
+                              <SelectItem key={state} value={state}>
+                                {state}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.4 }}>
-              <p className="text-sm text-gray-500 mb-4">
-                Fields marked with <span className="text-red-500">*</span> are mandatory.
-              </p>
+                  <FormField
+                    control={form.control}
+                    name="orderZipCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Order Zip Code</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Leave empty if same"
+                            {...field}
+                            className="bg-[#15191A] border-none focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <Button
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="trackingId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tracking ID</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="bg-[#15191A] border-none focus:border-green-500" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="trackingCompany"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tracking Company</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="bg-[#15191A] border-none focus:border-green-500" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="paymentStatus"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Payment Status</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={(value) => {
+                            field.onChange(value)
+                          }}
+                          value={field.value || "paid"}
+                          defaultValue="paid"
+                          className="flex space-x-4"
+                        >
+                          <FormItem className=" space-x-2">
+                            <FormControl>
+                              <RadioGroupItem value="pending" />
+                            </FormControl>
+                            <FormLabel className="font-normal">Pending</FormLabel>
+                          </FormItem>
+                          <FormItem className="space-x-2">
+                            <FormControl>
+                              <RadioGroupItem value="paid" />
+                            </FormControl>
+                            <FormLabel className="font-normal">Paid</FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </motion.div>
+            </div>
+
+            <motion.div className="mx-auto flex items-center justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.4 }}>
+              {/* <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+                className="w-[85%] bg-blue-700 mt-4 hover:bg-blue-800 text-white font-bold py-4 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
-              </Button>
+              </Button> */}
             </motion.div>
           </form>
         </Form>
@@ -602,4 +620,3 @@ export function AddCustomerDetailForm() {
     </Card>
   )
 }
-

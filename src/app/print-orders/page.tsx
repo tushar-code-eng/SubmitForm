@@ -303,10 +303,10 @@ export default function UserManagement() {
   }, [searchTerm, users, trackingIdUsers, editingTrackingIds])
 
   return (
-    <div className="py-1">
+    <div className="overflow-y-auto w-full">
       <Card className="w-full bg-white shadow-none border-none">
         <CardHeader>
-          <CardTitle className="text-4xl font-bold">Customer Details</CardTitle>
+          <CardTitle className="text-2xl font-bold">Customer Details</CardTitle>
         </CardHeader>
         <CardContent className="px-6">
           <div className="flex flex-wrap gap-4 mb-6">

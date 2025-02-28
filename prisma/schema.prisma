@@ -32,7 +32,7 @@ model Order {
   orderZipCode    String            @default("")
   trackingId      String
   trackingCompany String
-  paymentStatus   paymentStatusEnum
+  paymentStatus   paymentStatusEnum @default(paid)
   isPrinted       Boolean           @default(false)
   userId          String
   user            User              @relation(fields: [userId], references: [id])
