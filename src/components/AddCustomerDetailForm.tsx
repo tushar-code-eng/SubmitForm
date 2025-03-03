@@ -220,15 +220,6 @@ export function AddCustomerDetailForm() {
             <AlignEndVertical className="text-green-500" />
             <p> <span className="text-[#575D60]">Customer/</span>Order</p>
           </div>
-          <div>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="border bg-transparent text-[#F4F4F6] border-blue-700 text-lg font-light hover:bg-blue-800 py-3 px-6 shadow-sm shadow-blue-600 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
-            >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </Button>
-          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="py-3">
@@ -604,15 +595,14 @@ export function AddCustomerDetailForm() {
                 />
               </motion.div>
             </div>
-
-            <motion.div className="mx-auto flex items-center justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.4 }}>
-              {/* <Button
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.4 }}>
+              <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-[85%] bg-blue-700 mt-4 hover:bg-blue-800 text-white font-bold py-4 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+                className="w-full bg-blue-600 hover:bg-blue-700 mt-2 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
-              </Button> */}
+              </Button>
             </motion.div>
           </form>
         </Form>
