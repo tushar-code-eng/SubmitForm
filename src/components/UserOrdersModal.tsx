@@ -102,20 +102,20 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
     return (
         <Dialog onOpenChange={(open) => open && fetchOrders()}>
             <DialogTrigger asChild>
-                <Button variant="outline">View Orders</Button>
+                <Button className='bg-transparent hover:bg-transparent border-neutral-700 border text-gray-300 hover:border-green-500 hover:border' >View Orders</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
-                <DialogHeader>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto bg-[#15191A] border-none">
+                <DialogHeader className='text-gray-400'>
                     <DialogTitle>{userName}'s Orders</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4">
+                <div className="grid gap-4 ">
                     {orders.map((order) => {
                         const editedOrder = editedOrders[order.id];
                         const isEdited = !!editedOrder;
 
                         return (
-                            <Card key={order.id}>
-                                <CardHeader>
+                            <Card className=' bg-transparent border border-none rounded-xl ' key={order.id}>
+                                <CardHeader className='text-gray-500'>
                                     <CardTitle>Order Date : {(() => {
                                         const [year, month, day] = order.orderDate.split("T")[0].split("-");
                                         return `${day}/${month}/${year}`;
@@ -129,6 +129,7 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                 <Input
                                                     value={editedOrder?.orderDetails ?? order.orderDetails}
                                                     onChange={(e) => handleEdit(order.id, 'orderDetails', e.target.value)}
+                                                    className="bg-[#1D2328] border-none focus:border-green-500"
                                                 />
                                             </div>
                                             <div>
@@ -137,6 +138,7 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                     type="number"
                                                     value={editedOrder?.numOfPieces ?? order.numOfPieces}
                                                     onChange={(e) => handleEdit(order.id, 'numOfPieces', parseInt(e.target.value))}
+                                                    className="bg-[#1D2328] border-none focus:border-green-500"
                                                 />
                                             </div>
                                         </div>
@@ -147,6 +149,7 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                     type="number"
                                                     value={editedOrder?.numOfParcels ?? order.numOfParcels}
                                                     onChange={(e) => handleEdit(order.id, 'numOfParcels', parseInt(e.target.value))}
+                                                    className="bg-[#1D2328] border-none focus:border-green-500"
                                                 />
                                             </div>
                                             <div>
@@ -155,6 +158,7 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                     type="number"
                                                     value={editedOrder?.totalAmount ?? order.totalAmount}
                                                     onChange={(e) => handleEdit(order.id, 'totalAmount', parseInt(e.target.value))}
+                                                    className="bg-[#1D2328] border-none focus:border-green-500"
                                                 />
                                             </div>
                                         </div>
@@ -164,6 +168,7 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                 <Input
                                                     value={editedOrder?.orderAddress ?? order.orderAddress}
                                                     onChange={(e) => handleEdit(order.id, 'orderAddress', parseInt(e.target.value))}
+                                                    className="bg-[#1D2328] border-none focus:border-green-500"
                                                 />
                                             </div>
                                             <div>
@@ -171,6 +176,7 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                 <Input
                                                     value={editedOrder?.orderZipCode ?? order.orderZipCode}
                                                     onChange={(e) => handleEdit(order.id, 'orderZipCode',e.target.value)}
+                                                    className="bg-[#1D2328] border-none focus:border-green-500"
                                                 />
                                             </div>
                                         </div>
@@ -180,6 +186,7 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                 <Input
                                                     value={editedOrder?.trackingId ?? order.trackingId}
                                                     onChange={(e) => handleEdit(order.id, 'trackingId', e.target.value)}
+                                                    className="bg-[#1D2328] border-none focus:border-green-500"
                                                 />
                                             </div>
                                             <div>
@@ -187,6 +194,7 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                 <Input
                                                     value={editedOrder?.trackingCompany ?? order.trackingCompany}
                                                     onChange={(e) => handleEdit(order.id, 'trackingCompany', e.target.value)}
+                                                    className="bg-[#1D2328] border-none focus:border-green-500"
                                                 />
                                             </div>
                                         </div>
@@ -196,8 +204,9 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                 <Select
                                                     value={editedOrder?.orderState ?? order.orderState}
                                                     onValueChange={(value) => handleEdit(order.id, 'orderState', value)}
+                                                    
                                                 >
-                                                    <SelectTrigger>
+                                                    <SelectTrigger className="bg-[#1D2328] border-none focus:border-green-500">
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -215,7 +224,7 @@ export default function UserOrdersModal({ userId, userName }: UserOrdersModalPro
                                                     value={editedOrder?.paymentStatus ?? order.paymentStatus}
                                                     onValueChange={(value) => handleEdit(order.id, 'paymentStatus', value)}
                                                 >
-                                                    <SelectTrigger>
+                                                    <SelectTrigger className="bg-[#1D2328] border-none focus:border-green-500">
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>

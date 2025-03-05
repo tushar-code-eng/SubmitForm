@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils"
 import EditUserDetails from "@/components/EditUserDetails"
 // const AAKA_LOGO = "data:image/png;base64,..."
 
+import { NotebookTabs } from "lucide-react"
+
 export default function UserManagement() {
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [selectedUsers, setSelectedUsers] = useState<User[]>([])
@@ -303,15 +305,20 @@ export default function UserManagement() {
   }, [searchTerm, users, trackingIdUsers, editingTrackingIds])
 
   return (
-    <div className="overflow-y-auto w-full">
-      <Card className="w-full bg-white shadow-none border-none">
+    <div className="overflow-y-auto w-full p-3">
+      <Card className="w-full bg-[#15191A] border border-neutral-800 rounded-xl shadow-none border-none">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Customer Details</CardTitle>
+          <CardTitle className="text-xl flex w-full items-center justify-between font-light gap-2 text-[#F4F4F6]">
+            <div className="flex items-center gap-2">
+              <NotebookTabs className="text-green-500" />
+              <p> <span className="text-[#575D60]">Customer </span>Details</p>
+            </div>
+          </CardTitle>
         </CardHeader>
         <CardContent className="px-6">
           <div className="flex flex-wrap gap-4 mb-6">
             <div className="flex-1 min-w-[200px]">
-              <label htmlFor="dateFilter" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="dateFilter" className="block text-sm font-thin text-[#F4F4F6] mb-1">
                 Filter by Registration Date:
               </label>
               <div className="relative">
@@ -320,13 +327,13 @@ export default function UserManagement() {
                   id="dateFilter"
                   value={selectedDate}
                   onChange={handleDateChange}
-                  className="pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+                  className="pl-10 bg-[#1D2328] border-none focus:border-green-500"
                 />
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#F4F4F6]" size={18} />
               </div>
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="search" className="block text-sm font-thin text-[#F4F4F6] mb-1">
                 Search:
               </label>
               <div className="relative">
@@ -335,7 +342,7 @@ export default function UserManagement() {
                   placeholder="Search by name, address, state or date..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+                  className="pl-10  bg-[#1D2328] border-none focus:border-green-500"
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
@@ -345,24 +352,21 @@ export default function UserManagement() {
             <Button
               onClick={handleDeleteSelectedUsers}
               disabled={selectedUsers.length === 0 || !selectedDate || isLoading}
-              variant="destructive"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-red-700 hover:bg-red-600"
             >
               <Trash2 size={18} />
               Delete Print Records
             </Button>
             <Button
               onClick={handleEditingTrackingIds}
-              variant={editingTrackingIds ? "destructive" : "secondary"}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2  bg-transparent hover:bg-transparent border-neutral-700 border `}
             >
               <Edit size={18} />
               {editingTrackingIds ? "Cancel Editing" : "Edit Tracking IDs"}
             </Button>
             <Button
               onClick={() => handleSelectAll(!selectedUsers.length)}
-              variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-transparent hover:bg-transparent border-neutral-700 border "
             >
               <Checkbox
                 checked={selectedUsers.length === (editingTrackingIds ? trackingIdFilter : filteredUsers).length}
@@ -370,7 +374,7 @@ export default function UserManagement() {
               />
               Select All
             </Button>
-            <p className="text-sm font-medium text-gray-700">
+            <p className="text-sm font-medium text-[#F4F4F6]">
               Selected Users: <span className="font-bold">{selectedUsers.length}</span>
             </p>
           </div>
@@ -379,8 +383,8 @@ export default function UserManagement() {
               <Card
                 key={user.id}
                 className={cn(
-                  user.orders && user.orders.length > 0 && user.orders[0].isPrinted ? "bg-green-100" : "bg-white",
-                  "hover:bg-gray-50 cursor-pointer transition-colors",
+                  user.orders && user.orders.length > 0 && user.orders[0].isPrinted ? "border border-green-500" : "border border-neutral-800",
+                  "hover:border-blue-500 cursor-pointer transition-colors  bg-[#15191A]",
                   selectedUsers.some((selectedUser) => selectedUser.id === user.id) && "ring-2 ring-blue-500",
                 )}
                 onClick={() => handleCardClick(user)}
@@ -394,16 +398,16 @@ export default function UserManagement() {
                     />
                     <span className="text-sm text-gray-500">#{index + 1}</span>
                   </div>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2 text-gray-400 ">
                     <UserIcon className="w-5 h-5 text-gray-400" />
-                    <h3 className="text-lg font-semibold">{user.fullName}</h3>
+                    <h3 className="text-lg">{user.fullName}</h3>
                   </div>
-                  <p className="text-sm text-gray-600 mb-1">
+                  <p className="text-sm text-gray-300 mb-1">
                     {user.orders && user.orders.length > 0 && user.orders[0].orderAddress
                       ? user.orders[0].orderAddress
                       : user.address}
                   </p>
-                  <p className="text-sm text-gray-600 mb-1">
+                  <p className="text-sm text-gray-300 mb-1">
                     {user.orders && user.orders.length > 0 && user.orders[0].orderState
                       ? user.orders[0].orderState
                       : user.state}
@@ -412,8 +416,8 @@ export default function UserManagement() {
                       ? user.orders[0].orderZipCode
                       : user.zipCode}
                   </p>
-                  <p className="text-sm text-gray-600 mb-1">{user.mobileNumber}</p>
-                  <p className="text-sm text-gray-600 mb-2">{user.alternateMobileNumber || "No alternate number"}</p>
+                  <p className="text-sm text-gray-300 mb-1">{user.mobileNumber}</p>
+                  <p className="text-sm text-gray-300 mb-2">{user.alternateMobileNumber || "No alternate number"}</p>
                   <div className="mt-2 flex items-center w-full justify-between">
                     <UserOrdersModal userId={user.id} userName={user.fullName} />
                     <EditUserDetails userId={user.id} userName={user.fullName} />

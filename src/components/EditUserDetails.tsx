@@ -106,7 +106,7 @@ export default function EditUserDetails({ userId, userName }: EditUserDetailsPro
     return (
         <Dialog open={isOpen} onOpenChange={handleDialogChange}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="bg-violet-600 text-white">
+                <Button className="bg-transparent hover:bg-transparent border-neutral-700 border text-gray-300  hover:border-green-500 hover:border">
                     Edit User
                 </Button>
             </DialogTrigger>
