@@ -11,7 +11,7 @@ export async function GET(request: Request) {
         const users = await prisma.user.findMany({
             where: {
                 fullName: {
-                    startsWith: trimmedNameValue,
+                    contains: trimmedNameValue,
                     mode: 'insensitive',
                 },
             },
