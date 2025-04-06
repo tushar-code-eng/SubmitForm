@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         // Get current time in IST
         const currentDate = new Date()
         // Add 5 hours and 30 minutes to get IST
-        const istDate = new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000))
+        const istDate = body.orderDate ?? new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000))
 
         const order = await prisma.order.create({
             data: {
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
                 trackingCompany: body.trackingCompany,
                 paymentStatus: body.paymentStatus,
                 userId: body.userId,
-                orderDate: istDate,
+                orderDate:istDate,
             },
         })
 

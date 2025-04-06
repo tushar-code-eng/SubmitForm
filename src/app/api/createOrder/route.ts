@@ -14,6 +14,7 @@ export async function POST(request: Request) {
             zipCode,
             mobileNumber,
             alternateMobileNumber,
+            orderDate,
             orderDetails,
             numOfPieces,
             numOfParcels,
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
         } = body
 
         const currentDate = new Date()
-        const istDate = new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000))
+        const istDate = orderDate ?? new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000))
 
         // Check if user exists
         let user = await prisma.user.findUnique({
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
                     trackingCompany: trackingCompany ?? "",
                     paymentStatus: paymentStatus ?? "pending",
                     userId: user.id,
-                    orderDate: istDate,
+                    orderDate:orderDate,
                 },
             })
         }

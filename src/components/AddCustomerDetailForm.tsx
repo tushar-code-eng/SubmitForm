@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { indianRegions } from "@/utils/IndianStates"
-import { X, User, Package } from "lucide-react"
+import { X, User, Package, Calendar } from "lucide-react"
 import axios from "axios"
 
 import { Button } from "@/components/ui/button"
@@ -50,6 +50,7 @@ const formSchema = z.object({
     .regex(/^[6-9]\d{9}$/, { message: "Please enter a valid 10-digit mobile number." })
     .or(z.literal(""))
     .optional(),
+  orderDate: z.date().optional(),
   orderDetails: z.string().min(2, { message: "Order details cannot be empty" }),
   numOfPieces: z.union([z.string().transform((val) => (val === "" ? undefined : Number(val))), z.number()]).optional(),
   numOfParcels: z.union([z.string().transform((val) => (val === "" ? undefined : Number(val))), z.number()]).optional(),
@@ -134,6 +135,7 @@ export function AddCustomerDetailForm() {
       zipCode: "",
       mobileNumber: "",
       alternateMobileNumber: "",
+      orderDate: undefined,
       orderDetails: "",
       numOfPieces: undefined,
       numOfParcels: undefined,
@@ -154,11 +156,14 @@ export function AddCustomerDetailForm() {
     form.setValue("zipCode", user.zipCode)
     form.setValue("mobileNumber", user.mobileNumber)
     form.setValue("alternateMobileNumber", user.alternateMobileNumber)
+    form.setValue("orderDate", user.orderDate)
     setShowSuggestions(false)
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
+
+    console.log(values)
 
     try {
       const response = await fetch("/api/createOrder", {
@@ -183,6 +188,7 @@ export function AddCustomerDetailForm() {
           zipCode: "",
           mobileNumber: "",
           alternateMobileNumber: "",
+          orderDate: undefined,
           orderDetails: "",
           numOfPieces: undefined,
           numOfParcels: undefined,
@@ -364,6 +370,33 @@ export function AddCustomerDetailForm() {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="orderDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <NormalFormLabel>Order Date</NormalFormLabel>
+                        <p className=" text-xs text-[#ffffffb3] font-extralight" >Leave empty for current date</p>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type="date"
+                              onChange={(e) => {
+                                const dateValue = e.target.value ? new Date(e.target.value) : undefined;
+                                field.onChange(dateValue);
+                              }}
+                              value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                              className="pl-10 bg-[#1D2328] border-none focus:border-green-500"
+                            />
+                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#F4F4F6]" size={18} />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                 </div>
               </motion.div>
 
