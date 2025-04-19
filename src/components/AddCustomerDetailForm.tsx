@@ -50,8 +50,7 @@ const formSchema = z.object({
     .regex(/^[6-9]\d{9}$/, { message: "Please enter a valid 10-digit mobile number." })
     .or(z.literal(""))
     .optional(),
-  orderDate: z.date().optional(),
-  orderDetails: z.string().min(2, { message: "Order details cannot be empty" }),
+  orderDetails: z.string().optional(),
   numOfPieces: z.union([z.string().transform((val) => (val === "" ? undefined : Number(val))), z.number()]).optional(),
   numOfParcels: z.union([z.string().transform((val) => (val === "" ? undefined : Number(val))), z.number()]).optional(),
   totalAmount: z.union([z.string().transform((val) => (val === "" ? undefined : Number(val))), z.number()]).optional(),
@@ -135,7 +134,6 @@ export function AddCustomerDetailForm() {
       zipCode: "",
       mobileNumber: "",
       alternateMobileNumber: "",
-      orderDate: undefined,
       orderDetails: "",
       numOfPieces: undefined,
       numOfParcels: undefined,
@@ -156,7 +154,6 @@ export function AddCustomerDetailForm() {
     form.setValue("zipCode", user.zipCode)
     form.setValue("mobileNumber", user.mobileNumber)
     form.setValue("alternateMobileNumber", user.alternateMobileNumber)
-    form.setValue("orderDate", user.orderDate)
     setShowSuggestions(false)
   }
 
@@ -174,11 +171,16 @@ export function AddCustomerDetailForm() {
         body: JSON.stringify(values),
       })
 
+      console.log(response)
       const data = await response.json()
+
 
       if (!response.ok) {
         throw new Error(data.error || "Something went wrong")
       }
+
+      const currentDate = new Date()
+      const istDate = new Date(currentDate.getTime() + (5.5 * 60 * 60 * 1000))
 
       form.reset(
         {
@@ -188,7 +190,6 @@ export function AddCustomerDetailForm() {
           zipCode: "",
           mobileNumber: "",
           alternateMobileNumber: "",
-          orderDate: undefined,
           orderDetails: "",
           numOfPieces: undefined,
           numOfParcels: undefined,
@@ -370,7 +371,7 @@ export function AddCustomerDetailForm() {
                       </FormItem>
                     )}
                   />
-
+                  {/* 
                   <FormField
                     control={form.control}
                     name="orderDate"
@@ -386,7 +387,7 @@ export function AddCustomerDetailForm() {
                                 const dateValue = e.target.value ? new Date(e.target.value) : undefined;
                                 field.onChange(dateValue);
                               }}
-                              value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                              value={field.value ? new Date(field.value).toISOString().split('T')[0] : undefined}
                               className="pl-10 bg-[#1D2328] border-none focus:border-green-500"
                             />
                             <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#F4F4F6]" size={18} />
@@ -395,7 +396,7 @@ export function AddCustomerDetailForm() {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
 
                 </div>
               </motion.div>
@@ -415,7 +416,7 @@ export function AddCustomerDetailForm() {
                   name="orderDetails"
                   render={({ field }) => (
                     <FormItem>
-                      <RequiredFormLabel>Order Details</RequiredFormLabel>
+                      <FormLabel>Order Details</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Enter order details"

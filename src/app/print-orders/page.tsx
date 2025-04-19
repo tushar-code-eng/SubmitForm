@@ -119,7 +119,8 @@ export default function UserManagement() {
       })
       return
     }
-    const sendingOrderIdsOnly = users.map((user: any) => user.orders[0].id ?? null)
+
+    const sendingOrderIdsOnly = users.map((user: User) => user.orders[0]?.id ?? null)
 
     const updateBool = async () => {
       const res = await axios.put(`/api/updatePrintBool`, sendingOrderIdsOnly)

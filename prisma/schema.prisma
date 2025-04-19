@@ -23,7 +23,7 @@ model User {
 
 model Order {
   id              String            @id @default(uuid())
-  orderDetails    String
+  orderDetails    String            @default("")
   numOfPieces     Int
   numOfParcels    Int
   totalAmount     Int

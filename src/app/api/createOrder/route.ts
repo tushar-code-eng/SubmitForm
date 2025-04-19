@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         if (orderDetails || numOfPieces || numOfParcels || totalAmount || trackingId || trackingCompany || paymentStatus) {
             order = await prisma.order.create({
                 data: {
-                    orderDetails: orderDetails,
+                    orderDetails: orderDetails ?? "",
                     numOfPieces: numOfPieces ?? 0,
                     numOfParcels: numOfParcels ?? 0,
                     totalAmount: totalAmount ?? 0,
