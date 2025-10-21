@@ -382,7 +382,7 @@ export function AddCustomerDetailForm() {
                   name="orderDetails"
                   render={({ field }) => (
                     <FormItem>
-                      <RequiredFormLabel>Order Details</RequiredFormLabel>
+                      <NormalFormLabel>Order Details</NormalFormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Enter order details"
