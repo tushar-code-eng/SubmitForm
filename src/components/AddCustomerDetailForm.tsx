@@ -50,7 +50,7 @@ const formSchema = z.object({
     .regex(/^[6-9]\d{9}$/, { message: "Please enter a valid 10-digit mobile number." })
     .or(z.literal(""))
     .optional(),
-  orderDetails: z.string().min(2, { message: "Order details cannot be empty" }),
+  orderDetails: z.string().optional(),
   numOfPieces: z.union([z.string().transform((val) => (val === "" ? undefined : Number(val))), z.number()]).optional(),
   numOfParcels: z.union([z.string().transform((val) => (val === "" ? undefined : Number(val))), z.number()]).optional(),
   totalAmount: z.union([z.string().transform((val) => (val === "" ? undefined : Number(val))), z.number()]).optional(),
